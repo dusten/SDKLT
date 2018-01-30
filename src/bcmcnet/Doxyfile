@@ -1,0 +1,7 @@
+PROJECT_NAME            = "Core Network Driver Library (BCMCNET)"
+@INCLUDE                = ../doc/Doxyfile.sdk
+
+INPUT                   = DOC/bcmcnet.dox \
+                          include
+
+OUTPUT_DIRECTORY        = ../doxygen_bcmcnet

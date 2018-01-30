@@ -1,0 +1,8 @@
+PROJECT_NAME            = "Explicit Congestion Notification Library (BCMECN)"
+@INCLUDE                = ../doc/Doxyfile.sdk
+
+INPUT                   = DOC/bcmecn.dox \
+                          include
+
+OUTPUT_DIRECTORY        = ../doxygen_bcmecn
+IMAGE_PATH              = DOC/

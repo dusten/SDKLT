@@ -1,0 +1,7 @@
+PROJECT_NAME            = "Configuration Library (BCMCFG)"
+@INCLUDE                = ../doc/Doxyfile.sdk
+
+INPUT                   = DOC/bcmcfg.dox \
+                          include/bcmcfg
+
+OUTPUT_DIRECTORY        = ../doxygen/bcmcfg

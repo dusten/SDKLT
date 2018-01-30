@@ -1,0 +1,9 @@
+PROJECT_NAME            = "Trunking Library (BCMTRUNK)"
+@INCLUDE                = ../doc/Doxyfile.sdk
+
+INCLUDE_PATH            = include
+
+INPUT                   = DOC/bcmtrunk.dox \
+                          include
+
+OUTPUT_DIRECTORY        = ../doxygen_bcmtrunk

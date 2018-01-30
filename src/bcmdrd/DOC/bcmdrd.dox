@@ -1,0 +1,13 @@
+/*! \mainpage User Guide
+
+\tableofcontents
+
+\section intro Overview
+
+The SDK Device Resource Database (DRD) library contains detailed
+device descriptions as well as APIs for accessing this information.
+
+The makefile for the DRD library is built upon the make include files
+in the <tt>$SDK/make</tt> directory.
+
+*/

@@ -1,0 +1,11 @@
+PROJECT_NAME            = "Link Manager Library (BCMLM)"
+@INCLUDE                = ../doc/Doxyfile.sdk
+
+INCLUDE_PATH            = include
+
+INPUT                   = DOC/bcmlm.dox \
+                          include
+
+EXCLUDE_PATTERNS        = *_internal.h
+
+OUTPUT_DIRECTORY        = ../doxygen_bcmlm

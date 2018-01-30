@@ -1,0 +1,12 @@
+/*! \mainpage User Guide
+
+\tableofcontents
+
+\section intro Overview
+
+The SDK L2 library contains APIs for managing L2 logical tables.
+
+The makefile for the L2 library is built upon the make include files
+in the <tt>$SDK/make</tt> directory.
+
+*/

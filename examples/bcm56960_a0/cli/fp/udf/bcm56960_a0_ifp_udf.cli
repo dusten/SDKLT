@@ -1,0 +1,260 @@
+#
+# Copyright: (c) 2018 Broadcom. All Rights Reserved. "Broadcom" refers to 
+# Broadcom Limited and/or its subsidiaries.
+# 
+# Broadcom Switch Software License
+# 
+# This license governs the use of the accompanying Broadcom software. Your 
+# use of the software indicates your acceptance of the terms and conditions 
+# of this license. If you do not agree to the terms and conditions of this 
+# license, do not use the software.
+# 1. Definitions
+#    "Licensor" means any person or entity that distributes its Work.
+#    "Software" means the original work of authorship made available under 
+#    this license.
+#    "Work" means the Software and any additions to or derivative works of 
+#    the Software that are made available under this license.
+#    The terms "reproduce," "reproduction," "derivative works," and 
+#    "distribution" have the meaning as provided under U.S. copyright law.
+#    Works, including the Software, are "made available" under this license 
+#    by including in or with the Work either (a) a copyright notice 
+#    referencing the applicability of this license to the Work, or (b) a copy 
+#    of this license.
+# 2. Grant of Copyright License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    copyright license to reproduce, prepare derivative works of, publicly 
+#    display, publicly perform, sublicense and distribute its Work and any 
+#    resulting derivative works in any form.
+# 3. Grant of Patent License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    patent license to make, have made, use, offer to sell, sell, import, and 
+#    otherwise transfer its Work, in whole or in part. This patent license 
+#    applies only to the patent claims licensable by Licensor that would be 
+#    infringed by Licensor's Work (or portion thereof) individually and 
+#    excluding any combinations with any other materials or technology.
+#    If you institute patent litigation against any Licensor (including a 
+#    cross-claim or counterclaim in a lawsuit) to enforce any patents that 
+#    you allege are infringed by any Work, then your patent license from such 
+#    Licensor to the Work shall terminate as of the date such litigation is 
+#    filed.
+# 4. Redistribution
+#    You may reproduce or distribute the Work only if (a) you do so under 
+#    this License, (b) you include a complete copy of this License with your 
+#    distribution, and (c) you retain without modification any copyright, 
+#    patent, trademark, or attribution notices that are present in the Work.
+# 5. Derivative Works
+#    You may specify that additional or different terms apply to the use, 
+#    reproduction, and distribution of your derivative works of the Work 
+#    ("Your Terms") only if (a) Your Terms provide that the limitations of 
+#    Section 7 apply to your derivative works, and (b) you identify the 
+#    specific derivative works that are subject to Your Terms. 
+#    Notwithstanding Your Terms, this license (including the redistribution 
+#    requirements in Section 4) will continue to apply to the Work itself.
+# 6. Trademarks
+#    This license does not grant any rights to use any Licensor's or its 
+#    affiliates' names, logos, or trademarks, except as necessary to 
+#    reproduce the notices described in this license.
+# 7. Limitations
+#    Platform. The Work and any derivative works thereof may only be used, or 
+#    intended for use, with a Broadcom switch integrated circuit.
+#    No Reverse Engineering. You will not use the Work to disassemble, 
+#    reverse engineer, decompile, or attempt to ascertain the underlying 
+#    technology of a Broadcom switch integrated circuit.
+# 8. Termination
+#    If you violate any term of this license, then your rights under this 
+#    license (including the license grants of Sections 2 and 3) will 
+#    terminate immediately.
+# 9. Disclaimer of Warranty
+#    THE WORK IS PROVIDED "AS IS" WITHOUT WARRANTIES OR CONDITIONS OF ANY 
+#    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WARRANTIES OR CONDITIONS OF 
+#    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE OR 
+#    NON-INFRINGEMENT. YOU BEAR THE RISK OF UNDERTAKING ANY ACTIVITIES UNDER 
+#    THIS LICENSE. SOME STATES' CONSUMER LAWS DO NOT ALLOW EXCLUSION OF AN 
+#    IMPLIED WARRANTY, SO THIS DISCLAIMER MAY NOT APPLY TO YOU.
+# 10. Limitation of Liability
+#    EXCEPT AS PROHIBITED BY APPLICABLE LAW, IN NO EVENT AND UNDER NO LEGAL 
+#    THEORY, WHETHER IN TORT (INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE 
+#    SHALL ANY LICENSOR BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY DIRECT, 
+#    INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF 
+#    OR RELATED TO THIS LICENSE, THE USE OR INABILITY TO USE THE WORK 
+#    (INCLUDING BUT NOT LIMITED TO LOSS OF GOODWILL, BUSINESS INTERRUPTION, 
+#    LOST PROFITS OR DATA, COMPUTER FAILURE OR MALFUNCTION, OR ANY OTHER 
+#    COMMERCIAL DAMAGES OR LOSSES), EVEN IF THE LICENSOR HAS BEEN ADVISED OF 
+#    THE POSSIBILITY OF SUCH DAMAGES.
+# 
+# 
+#
+
+################################################################################
+#
+# Purpose: CLI example to show configuration of UDF [User Defined Fields].
+#
+# Description: UDF Entry
+#              Packet format to match in UDF
+#              Ethertype: 0x0800 [IPv4]
+#              IP protocol: 0x32 [ESP]
+#              L2: Ethertype II
+#              VLAN tag: Single tag
+#
+#              Offset for UDF field to match in IFP
+#              Base offset: L3 outer header
+#              Relative offset from base offset: 20 bytes[ESP starts
+#                                                         after L3 header]
+#              Bytes to match in IFP: 4 [SPI is 4 bytes]
+#
+#              IFP Entry
+#              Group 1  - Qualifiers [UDF] and Mode [Auto]
+#              Rule 1   - UDF Data: 0x00010203
+#              Policy 1 - CopyToCPU
+#              Entry 1  - Associate Rule 1, Policy 1 with Entry 1 in Group 1
+#
+# Notes: The following example shows matching on Security Parameters Index [SPI]
+#        of the Encapsulated Security Payload[ESP]. ESP is a member of IPsec
+#        protocol suite. Its header is inserted after the IP header and before
+#        the next layer protocol header in transport mode.
+#
+# The initial steps of setting up packet IO, mapping queues to channel, starting
+# packet watcher, configuring port in loopback, checking port status,
+# configuring VLAN STG, MAC counters and creating VLAN are for validating the
+# functionality of this script. Port 1 is used for illustration purposes. The
+# next six steps configure UDF and IFP with the above description set.
+#
+# Setup diagram:
+#                +-----------------------------------------+
+#                |                                         |
+#                |                 BCM56960                |
+#                |                                         |
+#                |  UDF                                    |
+#                |  Qualifiers: Ethertype - 0x0800         |
+#                |              IP protocol - 0x32         |
+#                |              L2 - Ethertype II          |
+#                |              VLAN tag - single          |
+#                |                                         |
+#+-------------> |  Offset: Base offset - L3 Outer Header  +------------------>
+#    Port 1      |          Relative offset - 20 bytes     |
+#                |          No of bytes to match - 4 bytes |
+#                |  IFP                                    |
+#                |  Qualifiers: UDF - 0x00010203           |
+#                |                                         |
+#                |  Action: Copy to CPU                    |
+#                |                                         |
+#                +-----------------------------------------+
+#
+# Ingress port(s): 1.
+#
+# Egress port(s): Not relevant.
+#
+# Egress CoS queue: Not relevant.
+#
+# Device: bcm56960_a0
+#
+# NGSDK Version: 0.9
+#
+# Verification method: A packet is sent from port 1 to match the configuration
+# and it gets copied to cpu as per the action. The packet should be as below.
+#
+# Watch information: (interface 1)
+# [RX metadata information]
+#	      HGI                             :2
+#	      PKT_LENGTH                      :72
+#	      SRC_PORT_NUM                    :1
+#	      OUTER_VID                       :1
+#	      TIMESTAMP_TYPE                  :3
+#	      SWITCH                          :1
+# 	      INCOMING_TAG_STATUS             :2
+# [RX reasons]
+#	      CPU_FFP
+# Packet raw data (68):
+# 0000: 00 00 02 00 02 00 00 00 - 02 00 03 00 81 00 00 01
+# 0010: 08 00 45 00 00 2e 00 00 - 00 00 40 32 a4 c4 c0 a8
+# 0020: 01 14 0a 0a 0a 14 00 01 - 02 03 04 05 06 07 08 09
+# 0030: 0a 0b 0c 0d 0e 0f 10 11 - 12 13 14 15 16 17 18 19
+# 0040: a0 97 28 c3
+#
+################################################################################
+
+# Ports used for configuration.
+local PORT 1
+local PORT_BITMAP 0x2
+
+# Setup packet IO from diag shell.
+pktdev init
+
+# Map all queues to channel 1.
+pktdev chan queuemap 1 highword=0xffff lowword=0xffffffff
+
+# Start packet watcher to display packets arriving at CPU.
+rx watcher create
+
+# Enable Link Manager(linkscan task).
+lt LM_CONTROL insert SCAN_ENABLE=1
+
+# Configure software linkscan mode for port 1.
+lt LM_PORT_CONTROL insert PORT_ID=$PORT LINKSCAN_MODE=SOFTWARE
+
+# Configure port 1 in loopback mode.
+lt PC_PORT update PORT_ID=$PORT LOOPBACK_MODE=PC_LPBK_MAC
+
+# Allow Link Manager to collect status of the port 1.
+# Default Link Manager scan interval is 250 ms.
+sleep quiet 3
+
+# Check port 1 status. LINK_STATE=1 indicates port is UP.
+lt LM_LINK_STATE lookup PORT_ID=$PORT
+
+# Configure port 1 in forwarding state.
+lt VLAN_STG insert VLAN_STG_ID=1 STATE[$PORT]=FORWARD
+
+# Enable MAC counters for port 1.
+lt CTR_MAC insert PORT_ID=$PORT
+
+# Create VLAN 1 and include port 1.
+lt VLAN insert VLAN_ID=1 EGR_MEMBER_PORTS=$PORT_BITMAP \
+                         ING_MEMBER_PORTS=$PORT_BITMAP VLAN_STG_ID=1
+
+# Configure port 1 as ethernet port.
+lt PORT insert PORT_ID=$PORT PORT_TYPE=ETHERNET MY_MODID=0
+
+# Configure a profile to classify 0x8100 at bytes 12,13 of the packet to be
+# outer TPID and add 0x8100 as outgoing packet's outer TPID.
+lt VLAN_OUTER_TPID insert VLAN_OUTER_TPID_ID=0 ING_TPID=0x8100 EGR_TPID=0x8100
+
+# Classify packets with value 0x8100 at bytes 12,13 as outer VLAN tagged packet.
+lt PORT_POLICY insert PORT_ID=$PORT PASS_ON_OUTER_TPID_MATCH[0]=1
+
+# UDF configuration [-a autofills the default values of other keys which doesn't
+# matter for this configuration]
+lt UDF insert -a L2_TYPE=ETHER_II L2_ETHERTYPE=0x0800 NUM_VLAN_TAG=SINGLE \
+                 L3_FIELDS=0x32 \
+                 LAYER[0-1]=OUTER_L3_HDR OFFSET[0]=10,OFFSET[1]=11
+
+# FP configuration starts with the steps below.
+# ---------------------------------------------
+
+# Enable IFP on port 1.
+lt PORT_FP insert PORT_ID=$PORT FP_ING=1
+
+# Create IFP group 1 with qualifier[UDF] and auto mode.
+lt FP_ING_GRP_TEMPLATE insert FP_ING_GRP_TEMPLATE_ID=1 MODE_AUTO=1 \
+                              QUAL_UDF_CHUNKS_BITMAP[0-1]=0xFFFF
+
+# Create IFP rule with UDF[0x00010203] qualifier.
+lt FP_ING_RULE_TEMPLATE insert FP_ING_RULE_TEMPLATE_ID=1 \
+                               QUAL_UDF_CHUNKS[0]=0x0001,\
+                               QUAL_UDF_CHUNKS[1]=0x0203 \
+                               QUAL_UDF_CHUNKS_MASK[0-1]=0xFFFF
+
+# Configure copy to cpu action for IFP.
+lt FP_ING_POLICY_TEMPLATE insert FP_ING_POLICY_TEMPLATE_ID=1 \
+                                 ACTION_G_COPY_TO_CPU=1 ACTION_Y_COPY_TO_CPU=1 \
+                                 ACTION_R_COPY_TO_CPU=1
+
+# Associate group ID, policy ID and rule ID to the entry of group.
+lt FP_ING_ENTRY insert FP_ING_RULE_TEMPLATE_ID=1 FP_ING_GRP_TEMPLATE_ID=1 \
+                       FP_ING_ENTRY_ID=1 FP_ING_POLICY_TEMPLATE_ID=1
+
+# Send the packet with SPI:0x0001020304
+tx 1 portlist=1 DATA=0000020002000000020003008100000108004500002E000000004032A4C4C0A801140A0A0A14000102030405060708090A0B0C0D0E0F10111213141516171819A09728C3
+

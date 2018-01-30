@@ -1,0 +1,10 @@
+PROJECT_NAME            = "Metering Library (BCMMETER)"
+@INCLUDE                = ../doc/Doxyfile.sdk
+
+INPUT                   = DOC/bcmmeter.dox \
+                          include
+
+EXCLUDE                 = include/bcmmeter/chip
+
+OUTPUT_DIRECTORY        = ../doxygen_bcmmeter
+IMAGE_PATH              = DOC/

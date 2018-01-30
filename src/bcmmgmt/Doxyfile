@@ -1,0 +1,9 @@
+PROJECT_NAME            = "SDK Management Library (BCMMGMT)"
+@INCLUDE                = ../doc/Doxyfile.sdk
+
+INCLUDE_PATH            = include
+
+INPUT                   = DOC/bcmmgmt.dox \
+                          include
+
+OUTPUT_DIRECTORY        = ../doxygen_bcmmgmt

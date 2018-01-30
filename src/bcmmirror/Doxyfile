@@ -1,0 +1,7 @@
+PROJECT_NAME            = "Mirroring Library (BCMIRROR)"
+@INCLUDE                = ../doc/Doxyfile.sdk
+
+INPUT                   = DOC/bcmmirror.dox \
+                          include
+
+OUTPUT_DIRECTORY        = ../doxygen_bcmmirror

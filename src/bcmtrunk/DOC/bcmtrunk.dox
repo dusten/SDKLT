@@ -1,0 +1,12 @@
+/*! \mainpage User Guide
+
+\tableofcontents
+
+\section intro Overview
+
+The SDK TRUNK library contains APIs for trunk configuration.
+
+The makefile for the TRUNK library is built upon the make include files
+in the <tt>$SDK/make</tt> directory.
+
+*/

@@ -1,0 +1,252 @@
+/*! \mainpage User Guide
+
+\tableofcontents
+
+\section intro Overview
+
+The Broadcom System Log (BSL) component provides a uniform means of
+reporting log, debug, and trace messages from the switch SDK.  All
+such SDK output is sent to a single API call.  Customer applications
+implement hooks to tie this logging system into their application
+logging system or device I/O layers.  Customer control is possible
+over the generation and format of messages, which are tagged with
+information about their origin and severity.
+
+\subsection single_point_output Single Point of Output
+
+Customer applications have many varied requirements as to what
+messages should appear on what devices, and with what formatting.
+Sending all log messages through a single routine allows custom code
+to inspect messages and customize them.
+
+\subsection severity_levels Multiple Classes of Message Importance (Severity Levels)
+
+Messages are marked as fatal, error, warning, verbose, etc., and these
+severity levels can be enabled and disabled independently for
+relatively granular parts of the output (see \ref sources).
+
+\subsection sources Different Sources of Messages
+
+A "source" is a module or feature that generates debug messages.
+These sources must be independently enabled to limit the volume of
+output and focus on subsystems of interest.
+
+\subsection meta_data Additional Source Information
+
+The BSL provides unit number, file name, function name, and line
+number for every log message in a separate meta data structure, but
+the application can always omit this information from the actual
+output where it is not desired.
+
+\subsection output_sinks Multiple Output Sinks
+
+An output sink is a destination that stores or displays log messages,
+such as a terminal, file, or volatile or non-volatile circular buffer.
+Details of sinks vary greatly between customer systems.  The BSL does
+not itself implement output sinks, but fully functional sample
+implementations are included in the SDK.
+
+The sink used for a particular message might depend on attributes of
+the message.  For example, diagnostic shell messages might always be
+sent to the operator console, while errors and warnings are stored in
+to trace buffer in non-volatile memory.  BSL output also might be
+mirrored to more than one sink.  For example, a log message might
+display to an operator console and also simultaneously be logged to a
+file.  The format of message headers can vary between sinks.
+
+\section components Components
+
+BSL is a standalone library that resides underneath the SDK and on top
+of an existing logging system or platform I/O for the customer
+platform in use.  A "wedding cake"-style layer diagram is shown below.
+
+\image html bsl_layers.png
+\image latex bsl_layers.png "Application Layers with BSL" width=16cm
+
+All SDK output is produced via calls to BSL.  BSL in turn relies on
+application-specific code in the BSL "hooks" module.  This module
+customizes the filtering, format, and output functions for specific
+customer platforms.  Usually, the hooks are implemented in terms of an
+existing logging system or the device I/O functions for each platform.
+This might be as simple as "printf()", or as complex as any
+feature-rich logging system.
+
+The customer application may also call BSL output functions if desired
+for consistency of handling.  Or, customers may call their logging or
+I/O directly, bypassing the BSL code.  It is expected that many
+customer applications will include a large code base with an existing
+logging system.  This code need not be ported to use BSL.  The intent
+is for BSL to allow the SDK to be integrated into the customer
+application, not to force the customer application to use the BSL
+infrastructure.
+
+Source files for BSL in the SDK distribution include files that are
+expected to be altered to adapt BSL to the customer platform, located
+in the \c bcma/bsl directory.  Also, there are files that implement
+BSL and are normally not changed.  These files are located in the
+top-level \c bsl directory.
+
+\section sample Sample Implementation
+
+The sample implementation of the BSL output hooks can be found in \c
+bcma/bsl. Below is a brief description of each module.
+
+\subsection bslmgmt bcma_bslmgmt.c
+
+This is the implementation of the client hooks.  Broadcom provides an
+example implementation suitable for Broadcom SVK boards as reference
+code.  Customers are likely to replace this file to hook into the
+existing logging system for their software.
+
+\subsection bslenable bcma_bslenable.c
+
+Implementation of currently enabled severity state for the various BSL sources.
+
+\subsection bslsink bcma_bslsink.c
+
+Implementation to support multiple output sinks. The actual sinks can
+be found in the \c sinks sub-directory.
+
+\section application_interface Application Interface
+
+Client applications implement hooks to adapt BSL to the logging or I/O
+system used on their particular platform.  Reference code for these
+hooks appropriate for a simple system for Broadcom's SVK boards are
+provided in \c bcma/bsl/bcma_bslmgmt.c, for ease of replacement by
+customer code.
+
+\subsection Binding Hooks
+
+Hooks are a callback interface bound into the main BSL code at system
+init time.  Any initialization the customer requires for their own
+output hooks must be done before any BSL logging functions are called,
+so the client app should complete their I/O initialization before
+initializing the BSL hooks.  Broadcom recommends initializing BSL
+before any other SDK initialization steps.
+
+\code
+#include <bsl/bsl_ext.h> 
+{
+    ...
+    bsl_config_t bsl_config;
+
+    bsl_config_t_init(&bsl_config);
+
+    /* Install BSL routines */
+    bsl_config.out = bsl_hook_out;
+    bsl_config.check = bsl_hook_check;
+    bsl_init (&bsl_config);
+    ...
+}
+\endcode
+
+\subsection client_hooks Client Hooks Interface
+
+Customer applications all reside on their own unique software
+platforms.  Often, customers have a standard logging system already
+which they use within their application code.  The SDK logging module
+is designed to rely on implementation hooks provided by application
+code to tie the system into whatever logging interface is desired.
+The Broadcom reference implementation provides a fairly simple system
+which outputs messages to a TTY console.  More sophisticated clients
+may have volatile or non-volatile memory buffers, device file systems
+for storing log files, or network messaging to signal remote
+monitoring devices of events.
+
+\subsubsection bslmgmt_check_hook bcma_bslmgmt_check_hook
+
+The "check" hook filters log messages by unit, source, severity,
+and/or other parameters to determine which messages should actually
+appear.  Broadcom's reference implementation uses source and
+severity.  If the check hook returns FALSE, the message will not be
+passed to the out hook.
+
+\subsubsection bslmgmt_out_hook bcma_bslmgmt_out_hook
+
+The output hook is responsible for actually writing the formatted
+output as appropriate for the error message in question.
+
+The out hook may support multiple output sinks, for example, mirroring
+console output to a log file, or vice versa.
+
+The out hook controls the appearance of the message.  Typical hooks
+will format the source/severity/file/line parameters into a common
+message header format (which varies from application to application),
+as well as insert the arguments into the message format string.  The
+output message might be formatted differently for different output
+sinks.  For instance, interactive shell command output would rarely
+print the file/line for each line written to the console, but would
+instead just output the message and arguments, while a non-volatile
+message log might well store all of the source information in order to
+aid later debugging after a crash.
+
+Output may be also involve other programmatic actions by customer
+client code, such as notifying management systems of fatal errors or
+calling customer application callback routines.
+
+\subsection output_enable Enabling Output
+
+The bcma_bslmgmt_check_hook function tells the BSL system whether or
+not log output is to be generated for a particular message.  The
+implementation of this function is up to the client, so it could in
+theory be as simple as a single Boolean that enables all messages.
+Generally, though, this would result in the output sink(s) being
+swamped with messages, and so more fine-grained control is useful.
+
+The reference implementation for bcma_bslmgmt.c provided by Broadcom
+includes a section for maintaining this output-enable storage.  As
+with all the reference code in bcma_bslmgmt.c, this code is expected
+to be modified or replaced by code suitable for the particular
+customer application platform.  Platforms that already have a logging
+system might use their hooks to integrate the BSL enables into
+existing logging commands and storage, rather than maintain a separate
+system.
+
+Typically, the CLI that allows users to interactively control log
+output would use these routines to enable specific message types,
+while the bslmgmt_check_hook routine uses bslenable_get() to retrieve
+the enable value for a particular log message, without needing to know
+the internals of how and where that state is stored.
+
+Output enable management functions are found in
+bcma/bsl/bcma_bslenable.c.
+
+\subsubsection bslenable_get bcma_bslenable_get
+
+This function retrieves the output enable setting for the given unit,
+layer, source, and severity.  bsl_hook_check() calls this function in
+order to determine the validity of the output.
+
+\subsubsection bslenable_set bcma_bslenable_set
+
+This function sets the output enable setting for the given unit,
+layer, source, and severity.  It would typically be called by a CLI
+according to operator commands, or by some programmatic means for
+controlling debug output.
+
+\subsubsection bslenable_reset bcma_bslenable_reset, bcma_bslenable_reset_all
+
+This function initializes the output settings to their default state.
+Bslenable_reset resets one particular source.  Bslenable_reset_all
+resets all sources to their default severity.
+
+\subsection print_names Print Names
+
+Along with the enums that specify severity levels, sources, etc.,
+bsl.h provides print names (string values) for these enums.  Providing
+a standard set of human-readable names for the enums is intended to
+provide consistency between log messages and CLI commands.  For
+instance, if the log shows a message from the "VLAN" souce, it would
+be most usable if the CLI command to enable that source also called it
+"VLAN" (not "tags" or "source 3" or whatever).  Conversion functions
+for print names are found in bsl_names.h.
+
+\section Reference
+
+For a complete reference, please see:
+
+- \ref bsl_ext.h
+- \ref bsl_types.h
+- \ref bsl_names.h
+
+*/

@@ -1,0 +1,269 @@
+#
+# Copyright: (c) 2018 Broadcom. All Rights Reserved. "Broadcom" refers to 
+# Broadcom Limited and/or its subsidiaries.
+# 
+# Broadcom Switch Software License
+# 
+# This license governs the use of the accompanying Broadcom software. Your 
+# use of the software indicates your acceptance of the terms and conditions 
+# of this license. If you do not agree to the terms and conditions of this 
+# license, do not use the software.
+# 1. Definitions
+#    "Licensor" means any person or entity that distributes its Work.
+#    "Software" means the original work of authorship made available under 
+#    this license.
+#    "Work" means the Software and any additions to or derivative works of 
+#    the Software that are made available under this license.
+#    The terms "reproduce," "reproduction," "derivative works," and 
+#    "distribution" have the meaning as provided under U.S. copyright law.
+#    Works, including the Software, are "made available" under this license 
+#    by including in or with the Work either (a) a copyright notice 
+#    referencing the applicability of this license to the Work, or (b) a copy 
+#    of this license.
+# 2. Grant of Copyright License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    copyright license to reproduce, prepare derivative works of, publicly 
+#    display, publicly perform, sublicense and distribute its Work and any 
+#    resulting derivative works in any form.
+# 3. Grant of Patent License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    patent license to make, have made, use, offer to sell, sell, import, and 
+#    otherwise transfer its Work, in whole or in part. This patent license 
+#    applies only to the patent claims licensable by Licensor that would be 
+#    infringed by Licensor's Work (or portion thereof) individually and 
+#    excluding any combinations with any other materials or technology.
+#    If you institute patent litigation against any Licensor (including a 
+#    cross-claim or counterclaim in a lawsuit) to enforce any patents that 
+#    you allege are infringed by any Work, then your patent license from such 
+#    Licensor to the Work shall terminate as of the date such litigation is 
+#    filed.
+# 4. Redistribution
+#    You may reproduce or distribute the Work only if (a) you do so under 
+#    this License, (b) you include a complete copy of this License with your 
+#    distribution, and (c) you retain without modification any copyright, 
+#    patent, trademark, or attribution notices that are present in the Work.
+# 5. Derivative Works
+#    You may specify that additional or different terms apply to the use, 
+#    reproduction, and distribution of your derivative works of the Work 
+#    ("Your Terms") only if (a) Your Terms provide that the limitations of 
+#    Section 7 apply to your derivative works, and (b) you identify the 
+#    specific derivative works that are subject to Your Terms. 
+#    Notwithstanding Your Terms, this license (including the redistribution 
+#    requirements in Section 4) will continue to apply to the Work itself.
+# 6. Trademarks
+#    This license does not grant any rights to use any Licensor's or its 
+#    affiliates' names, logos, or trademarks, except as necessary to 
+#    reproduce the notices described in this license.
+# 7. Limitations
+#    Platform. The Work and any derivative works thereof may only be used, or 
+#    intended for use, with a Broadcom switch integrated circuit.
+#    No Reverse Engineering. You will not use the Work to disassemble, 
+#    reverse engineer, decompile, or attempt to ascertain the underlying 
+#    technology of a Broadcom switch integrated circuit.
+# 8. Termination
+#    If you violate any term of this license, then your rights under this 
+#    license (including the license grants of Sections 2 and 3) will 
+#    terminate immediately.
+# 9. Disclaimer of Warranty
+#    THE WORK IS PROVIDED "AS IS" WITHOUT WARRANTIES OR CONDITIONS OF ANY 
+#    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WARRANTIES OR CONDITIONS OF 
+#    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE OR 
+#    NON-INFRINGEMENT. YOU BEAR THE RISK OF UNDERTAKING ANY ACTIVITIES UNDER 
+#    THIS LICENSE. SOME STATES' CONSUMER LAWS DO NOT ALLOW EXCLUSION OF AN 
+#    IMPLIED WARRANTY, SO THIS DISCLAIMER MAY NOT APPLY TO YOU.
+# 10. Limitation of Liability
+#    EXCEPT AS PROHIBITED BY APPLICABLE LAW, IN NO EVENT AND UNDER NO LEGAL 
+#    THEORY, WHETHER IN TORT (INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE 
+#    SHALL ANY LICENSOR BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY DIRECT, 
+#    INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF 
+#    OR RELATED TO THIS LICENSE, THE USE OR INABILITY TO USE THE WORK 
+#    (INCLUDING BUT NOT LIMITED TO LOSS OF GOODWILL, BUSINESS INTERRUPTION, 
+#    LOST PROFITS OR DATA, COMPUTER FAILURE OR MALFUNCTION, OR ANY OTHER 
+#    COMMERCIAL DAMAGES OR LOSSES), EVEN IF THE LICENSOR HAS BEEN ADVISED OF 
+#    THE POSSIBILITY OF SUCH DAMAGES.
+# 
+# 
+#
+
+################################################################################
+
+# Purpose: Demonstrate IPv6 in IPv6 tunnel termination.
+
+# Description: At the end of the tunnel, the XGS switches removes the IPv6
+#              header and forwards the original IP based on its own header.
+
+# Setup diagram:
+#Ipv6inv6 tunnel packet
+#                      +-------------------+
+#DIP =                 |                   |  nexthop 3
+#DD00:0:0:0:0:0:0:1    |                   |  port:2
+#                      |                   |
+#  +-------------------+        SVK        +---------------->
+#                      |                   |
+#              port:1  |                   |
+#                      |                   |  DIP:AA00:0:0:0:0:0:0:1
+#                      +-------------------+
+#
+#
+#
+
+
+# Ingress port(s): 1.
+
+# Egress ports(s): 2.
+
+# Egress CoS queue: Not relevant.
+
+# Device: bcm56960_a0.
+
+# NGSDK Version: 0.7
+
+# Notes:
+#   This is self contained script i.e. it programs all the forwarding path.
+
+# Verification method:
+#    Use packet sampling to capture the modified packet on port 1 and chceck
+#    if it is as below:
+#Watch information: (interface 1)
+#[RX metadata information]
+#    HGI                             :2
+#    PKT_LENGTH                      :76
+#    SRC_PORT_NUM                    :2
+#    OUTER_VID                       :21
+#    ECN                             :3
+#    TIMESTAMP_TYPE                  :3
+#    SWITCH                          :1
+#    INCOMING_TAG_STATUS             :2
+#[RX reasons]
+#    CPU_SFLOW_SRC
+#Packet raw data (72):
+#0000: 00 00 00 00 00 01 00 00 - 00 00 11 11 81 00 00 15
+#0010: 86 dd 60 30 00 00 00 06 - 3b fe aa 00 00 00 00 00
+#0020: 00 00 00 00 00 00 00 00 - 00 01 bb 00 00 00 00 00
+#0030: 00 00 00 00 00 00 00 00 - 00 01 00 00 00 00 00 00
+#0040: 00 00 00 00 92 63 38 12
+
+################################################################################
+
+# Setup packet IO from diag shell for tx to work.
+pktdev init
+
+# Map all queues to channel 1.
+pktdev chan queuemap 1 highword=0xffff lowword=0xffffffff
+
+# Start packet watcher to capture packets at CPU.
+rx watcher create
+
+# Enable Link Manager (linkscan task).
+lt LM_CONTROL insert SCAN_ENABLE=1
+
+# Configure software Linkscan mode for ports 1-2.
+for port=1,2,1 'lt LM_PORT_CONTROL insert PORT_ID=$port LINKSCAN_MODE=SOFTWARE'
+
+# Configure ports 1-2 in loopback mode.
+for port=1,2,1 'lt PC_PORT update PORT_ID=$port LOOPBACK_MODE=PC_LPBK_MAC'
+
+# Allow Link Manager to collect status of the ports 1-2.
+# Default Link Manager scan interval is 250 ms.
+sleep quiet 3
+
+# Check ports 1-2 status. LINK_STATE=1 indicates port is UP.
+for port=1,2,1 'lt LM_LINK_STATE lookup PORT_ID=$port'
+
+# Enable MAC counters for ports 1-2.
+for port=1,2,1 'lt CTR_MAC insert PORT_ID=$port'
+
+# Configure UFT for 4 bank ALPM mode.
+lt DEVICE_EM_GROUP update DEVICE_EM_GROUP_ID=ALPM_LEVEL2_GROUP NUM_BANKS=4 \
+      DEVICE_EM_BANK_ID[0]=UFT_BANK0 DEVICE_EM_BANK_ID[1]=UFT_BANK1 \
+      DEVICE_EM_BANK_ID[2]=UFT_BANK2 DEVICE_EM_BANK_ID[3]=UFT_BANK3
+
+# Configure ports 1-2 in forwarding state.
+lt VLAN_STG insert VLAN_STG_ID=1 STATE[1-2]=FORWARD
+
+# Configure PORT_PKT_CONTROL to send arp request,reply to CPU.
+lt PORT_PKT_CONTROL insert PORT_PKT_CONTROL_ID=3 ARP_REQUEST_TO_CPU=1 \
+                          ARP_REPLY_TO_CPU=1
+
+# Add VLAN tag for untagged packets.
+lt VLAN_ING_TAG_ACTION_PROFILE insert VLAN_ING_TAG_ACTION_PROFILE_ID=1 \
+                              UT_OTAG=ADD
+
+# Create VLAN 22 and include port 1.
+lt VLAN insert VLAN_ID=22 EGR_MEMBER_PORTS=2 ING_MEMBER_PORTS=2 VLAN_STG_ID=1 \
+                 L3_IIF_ID=1
+
+# Create VLAN 21 and include port 2.
+lt VLAN insert VLAN_ID=21 EGR_MEMBER_PORTS=4 ING_MEMBER_PORTS=4 VLAN_STG_ID=1 \
+                L3_IIF_ID=1
+
+# Configure max MTU for vlans 21-22.
+for vlan=21,22,1 'lt L3_UC_MTU insert VLAN_ID=$vlan L3_MTU=0x3fff'
+
+# Configure profile to classify 0x8100 at bytes 12,13 of the packet to be
+# outer TPID and add 0x8100 as outgoing packets outer TPID.
+lt VLAN_OUTER_TPID insert VLAN_OUTER_TPID_ID=0 ING_TPID=0x8100 EGR_TPID=0x8100
+
+# Configure PORT_POLICY to classify packets with value 0x8100 at bytes 12,13
+# as outer VLAN tagged packet.
+for port=1,2,1 'lt PORT_POLICY insert PORT_ID=$port \
+                          PASS_ON_OUTER_TPID_MATCH[0]=1'
+
+# Enable IPv6 routing on port 1.
+lt PORT insert PORT_ID=1 V6L3=1 PORT_TYPE=ETHERNET MY_MODID=0 \
+        PORT_PKT_CONTROL_ID=3 VLAN_ING_TAG_ACTION_PROFILE_ID=1 ING_OVID=22
+
+# Create L3_IIF_PROFILE 2 and enable IPv6 routing.
+lt L3_IIF_PROFILE insert L3_IIF_PROFILE_ID=2 IPV6_UC=1
+
+# Create L3_IIF index 1 and set VRF_ID=0.
+lt L3_IIF insert L3_IIF_ID=1 VRF_ID=0 L3_IIF_PROFILE_ID=2
+
+# Program L2_MY_STATION_MODPORT to enable routing for
+# 00:00:00:00:22:22 + vlan_id = 22.
+lt L2_MY_STATION_MODPORT insert VLAN_ID=22 VLAN_ID_MASK=0xfff \
+                                MAC_ADDR=0x000000002222 \
+                                MAC_ADDR_MASK=0xffffffffffff \
+                                MODPORT=1 MODPORT_MASK=0xff \
+                                MODID=0 MODID_MASK=0xff \
+                                IPV6_TERMINATION=1 \
+                                COPY_TO_CPU=0
+
+# Tunnel termination at network side.
+lt TNL_IPV6_DECAP insert SRC_IPV6_UPPER=0xEE00000000000000 \
+                         SRC_IPV6_MASK_UPPER=0xffffffffffffffff \
+                         SRC_IPV6_LOWER=0x0000000000000001 \
+                         SRC_IPV6_MASK_LOWER=0xffffffffffffffff \
+                         DST_IPV6_UPPER=0xFF00000000000000 \
+                         DST_IPV6_MASK_UPPER=0xffffffffffffffff \
+                         DST_IPV6_LOWER=0x0000000000000001 \
+                         DST_IPV6_MASK_LOWER=0xffffffffffffffff \
+                         IP_PROTOCOL=41 IP_PROTOCOL_MASK=0xff \
+                         SRC_L4_PORT=0 SRC_L4_PORT_MASK=0 \
+                         DST_L4_PORT=0 DST_L4_PORT_MASK=0 \
+                         IPV6_PAYLOAD=1 DECAP_PORTS=2 L3_IIF_ID=1
+
+# Create egress L3 interface(L3_EIF)
+lt L3_EIF insert L3_EIF_ID=2 VLAN_ID=21 MAC_SA=0x000000001111
+
+# Create L3 nexthops.
+lt L3_UC_NHOP insert NHOP_ID=3 MODPORT=2 MODID=0 VLAN_ID=21 L3_EIF_ID=2 \
+                     MAC_DA=0x000000000001 COPY_TO_CPU=0
+
+# Create L3 LPM entry pointing to nexthop 2.
+lt L3_IPV6_UC_ROUTE insert IPV6_UPPER=0xBB00000000000000 \
+                           IPV6_UPPER_MASK=0xffffffffffffffff \
+                           IPV6_LOWER=0x0000000000000001 \
+                           IPV6_LOWER_MASK=0xffffffffffffffff \
+                           ECMP_NHOP=0 NHOP_ID=3
+
+# Enable sFlow on port 2.
+lt MIRROR_PORT_ENCAP_SFLOW insert PORT_ID=2 \
+                                  SAMPLE_ING=1 \
+                                  SAMPLE_ING_CPU=1 \
+                                  SAMPLE_ING_RATE=0xfffffff
+
+# Send the packet on port 1 using tx command.
+tx 1 portlist=1 DATA=00000000222200000000000286DD60300000002E29FFEE000000000000000000000000000001FF0000000000000000000000000000016030000000063BFFAA000000000000000000000000000001BB0000000000000000000000000000010000000000000000000092633812

@@ -1,0 +1,655 @@
+/*! \mainpage User Guide
+
+\tableofcontents
+
+\section intro Overview
+
+The SDK Packet I/O library contains interfaces for managing the packet I/O
+data-path, switching packets between application and hardware, interpreting
+metadata and managing packet buffers.
+
+The packet I/O API supports two DMA drivers, the KNET (Kernel NETworking)
+driver and the CNET (Core NETworking) driver. The KNET driver runs in Linux
+kernel, while the CNET driver runs in Linux user space. The application may
+attach one of the drivers onto a switch device to enable packet I/O access.
+
+\subsection overview_knet KNET driver mode
+
+Figure 2.1 provides an outline of the KNET packet I/O driver mode. There are
+four API sections, \ref bcmpkt_dev, \ref bcmpkt_knet, \ref bcmpkt_unet and
+\ref bcmpkt_net in this mode. The \ref bcmpkt_dev section provides
+interfaces for DMA configuration. The \ref bcmpkt_knet section provides
+interfaces to manage Virtual Network Interfaces (netif) and packet filters
+in the KNET mode. The \ref bcmpkt_unet section provides interfaces to build
+packet I/O API on top of Linux raw sockets (packet_mmap). The \ref bcmpkt_net
+section provides interfaces to receive and transmit packets. The
+\ref bcmpkt_dev and the \ref bcmpkt_knet communicate with KNET through Linux
+IOCTL API. The \ref bcmpkt_unet API and \ref bcmpkt_net API are built on
+Linux raw sockets (e.g. Packet_mmap), and these APIs are optional, i.e. the
+application may choose to receive or transmit packets directly through Linux
+socket API.
+\image html knet_mode_outline.png
+\image latex knet_mode_outline.png "Packet I/O KNET mode Outline" width=16cm
+
+\subsection overview_cnet CNET driver mode
+
+Figure 2.2 provides an outline of the CNET DMA packet I/O driver mode. There
+are two API sections, \ref bcmpkt_dev and \ref bcmpkt_net in this mode. The
+\ref bcmpkt_dev section provides interfaces for DMA configuration, and the
+\ref bcmpkt_net section provides interfaces to receive and transmit packets.
+\image html cnet_mode_outline.png
+\image latex cnet_mode_outline.png "Packet I/O CNET mode Outline" width=10cm
+
+\subsection overview_utility Utility
+
+The packet I/O library does not translate packet metadata for the application,
+but provides efficient interfaces for the application to
+encapsulate/decapsulate metadata in \ref bcmpkt_utility. The application may
+get RX metadata fields or set TX metadata fields via these APIs. The utility
+API also provides packet buffer management library. Please refer to the
+\ref bcmpkt_utility section for details.
+
+\subsection overview_boot_sequence Sequence for bringing up packet I/O
+
+Figure 2.3 is a standard packet I/O bring up sequence. The steps shown with
+a yellow background apply only to the KNET driver mode.
+\image html boot_sequence.png
+\image latex boot_sequence.png "Packet I/O CNET mode Outline" width=10cm
+Example sequence for enabling KNET packet I/O:
+    1. Call bcmlu_knet_attach and bcmlu_unet_attach to register the KNET mode
+	drivers;
+    2. Call \ref bcmpkt_dev_drv_attach and \ref bcmpkt_unet_drv_attach to
+	attach KNET drivers onto a unit;
+    3. Call \ref bcmpkt_bpool_create and \ref bcmpkt_ppool_create to create
+	buffer pools.
+    4. Call \ref bcmpkt_dev_init to initialize network device;
+    5. Call \ref bcmpkt_dma_chan_set to set up TX DMA channel and RX DMA
+	channel;
+    6. Call \ref bcmpkt_dev_enable to bringup the network device;
+    7. Call \ref bcmpkt_netif_create to create a network interface;
+    8. Call \ref bcmpkt_filter_create to filter RX packets to the netif;
+    9. Call \ref bcmpkt_unet_create to create UNET on the network interface;
+    10. Call \ref bcmpkt_rx_register to register RX callback for receiving
+    packets;
+
+Example sequence for enabling CNET packet I/O:
+    1. Call \ref bcmpkt_bpool_create and \ref bcmpkt_ppool_create to create
+	buffer pools.
+    2. Call \ref bcmpkt_dev_drv_attach to attach CNET drivers onto a unit;
+    3. Call \ref bcmpkt_dev_init to initialize network device;
+    4. Call \ref bcmpkt_dma_chan_set to set up TX DMA channel and RX DMA channel;
+    5. Call \ref bcmpkt_dev_enable to enable the network device;
+    6. Call \ref bcmpkt_rx_register to register RX callback for receiving
+    packets;
+
+Please refer to the following sections for details.
+
+\section bcmpkt_dev Network Device Management
+
+The Network Device Management API provides the capability to manage the network
+device (DMA). The SDK supports two types of device drivers, the KNET driver
+and the CNET driver. The CNET driver is always registered, while the KNET
+driver must be registered by calling bcmlu_knet_attach and bcmlu_unet_attach
+(registering UNET driver is optional). Then, the application may attach an
+appropriate network device driver onto a switch device.
+
+Network device API consists of device init, device cleanup, device information
+dump and DMA channel configuration. Configuration sequence rules:
+    - Packet I/O drivers should be registered and attached to a switch
+      unit before accessing the packet I/O
+      API to configure the network device;
+    - The \ref bcmpkt_dev_init is the first API to be called to initialize the
+      network device;
+    - The \ref bcmpkt_dma_chan_set API must be called to set up TX/RX DMA
+      channels before activating the network device using \ref
+      bcmpkt_dev_enable. When the network device is activated, changes via
+      \ref bcmpkt_dma_chan_set are no longer allowed.;
+
+Below is sample code for initializing packet device.
+\code{.c}
+void my_dev_init(int unit)
+{
+    shr_mac_t mac1 = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55};
+    static bcmpkt_dev_init_t cfg;
+    bcmpkt_dma_chan_t chan;
+    bcmpkt_dev_drv_types_t dev_drv_type;
+
+    /* Initialize device. */
+    memset(&cfg, 0, sizeof(cfg));
+    cfg.cgrp_size = 4;
+    cfg.cgrp_bmp = 0x7;
+    memcpy(cfg.mac_addr, mac1, 6);
+    bcmpkt_dev_init(unit, &cfg);
+
+    bcmpkt_dev_drv_type_get(unit, &dev_drv_type);
+    if (dev_drv_type == BCMPKT_DEV_DRV_T_CNET) {
+        bcmpkt_bpool_create(unit, 1536, BCMPKT_BPOOL_BCOUNT_DEF);
+    }
+
+    /* Configure TX channel*/
+    memset(&chan, 0, sizeof(chan));
+    chan.id = 0;
+    chan.dir = BCMPKT_DMA_CH_DIR_TX;
+    chan.ring_size = 64;
+    chan.max_frame_size = 1536;
+    bcmpkt_dma_chan_set(unit, &chan);
+
+    /* Configure RX channel*/
+    memset(&chan, 0, sizeof(chan));
+    chan.id = 1;
+    chan.dir = BCMPKT_DMA_CH_DIR_RX;
+    chan.ring_size = 64;
+    chan.max_frame_size = 1536;
+    bcmpkt_dma_chan_set(unit, &chan);
+
+    /* Bringup network device. */
+    bcmpkt_dev_enable(unit);
+
+    if (dev_drv_type == BCMPKT_DEV_DRV_T_KNET) {
+        bcmpkt_netif_t netif;
+        bcmpkt_filter_t filter;
+        shr_mac_t mac = {0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
+
+        /* Create netif. */
+        memset(&netif, 0, sizeof(netif));
+        memcpy(netif.mac_addr, mac, 6);
+        netif.vlan = 1;
+        netif.max_frame_size = 1536;
+        netif.flags = BCMPKT_NETIF_F_RCPU_ENCAP;
+        bcmpkt_netif_create(unit, &netif);
+
+        /* Setup UNET. */
+        bcmpkt_unet_create(unit, netif.id);
+
+        /* Create filter to forward all packet to the netif. */
+        memset(&filter, 0, sizeof(filter));
+        filter.type = BCMPKT_FILTER_T_RX_PKT;
+        filter.priority = 255;
+        filter.dest_type = BCMPKT_DEST_T_NETIF;
+        filter.dest_id = netif.id;
+        filter.dma_chan = 1;
+        bcmpkt_filter_create(unit, &filter);
+    }
+}
+\endcode
+
+For the complete Network device API description, refer to
+\ref bcmpkt_dev.h.
+
+\section bcmpkt_knet KNET Management
+
+The KNET API provides the capability to access KNET virtual network interface
+(netif) management and KNET packet filter configuration.
+
+\subsection bcmpkt_netif Network Interface Management
+
+The Network Interface (netif) is an object for managing packets delivered
+between the DMA driver and the application or the kernel
+protocol stack.
+
+For RX, KNET packet filter is responsible for dispatching packets among
+netifs. The application may also bind an RX DMA channel with a netif to forward
+all packets from the DMA channel to the netif.
+
+For TX, KNET is responsible for forwarding packets for all netifs. The
+application may bind a switch local port with a netif, and all packets from
+the netif will be sent to the port directly.
+
+Sample code for creating netifs.
+\code{.c}
+void my_netif_create(void)
+{
+    int unit = 1;
+    shr_mac_t mac1 = {0x00, 0x11, 0x00, 0x00, 0x00, 0x01};
+    shr_mac_t mac2 = {0x00, 0x11, 0x00, 0x00, 0x00, 0x02};
+    shr_mac_t mac3 = {0x00, 0x11, 0x00, 0x00, 0x00, 0x03};
+    bcmpkt_netif_t  netif;
+    ...
+    /* Create a normal netif */
+    memset(&netif, 0, sizeof(netif));
+    memcpy(netif.mac_addr, mac1, 6);
+    netif.vlan = 1;
+    netif.max_frame_size = 1536;
+    bcmpkt_netif_create(unit, &netif);
+
+    /* Create a netif with DMA channel 2 bond */
+    memset(&netif, 0, sizeof(netif));
+    memcpy(netif.mac_addr, mac2, 6);
+    netif.vlan = 1;
+    netif.dma_chan_id = 2;
+    netif.flags = BCMPKT_NETIF_F_BIND_RX_CH;
+    bcmpkt_netif_create(unit, &netif);
+
+    /* Create a netif with switch local port 10 bond */
+    memset(&netif, 0, sizeof(netif));
+    memcpy(netif.mac_addr, mac3, 6);
+    netif.vlan = 1;
+    netif.port = 10;
+    netif.flags = BCMPKT_NETIF_F_BIND_TX_PORT;
+    bcmpkt_netif_create(unit, &netif);
+    ...
+}
+void my_netif_traverse_cb(uint32_t unit, bcmpkt_netif_t *netif, void* cookie)
+{
+    printf("Unit: %d\n", unit);
+    printf("Netif ID: %d\n", netif->id);
+    ...
+}
+void my_traverse(void)
+{
+    int unit = 0;
+
+    bcmpkt_netif_traverse(unit, my_netif_traverse_cb, NULL);
+}
+\endcode
+
+\subsection packet_filter Packet Filter Configuration
+
+The KNET packet filter is a certain classifier with priority, and dispatching
+packets by the rules configured on a certain \ref bcmpkt_filter_t.dma_chan.
+A filter's matching key could be one or some fields in RX packet metadata, a
+certain raw data in packet header defined by \ref bcmpkt_filter_t.raw_size,
+\ref bcmpkt_filter_t.m_raw_data and \ref bcmpkt_filter_t.m_raw_mask, or their
+combination. The matched packets may be forwarded to a destination, mirrored
+to another destination with forwarding, or dropped. No rule hitting packets
+will be forwarded to default netif.
+
+Packet filter sample code:
+\code{.c}
+void my_filter_create(void)
+{
+    int unit = 1;
+    int rx_ch = 1; /* This should be a valid RX DMA channel. */
+    bcmpkt_filter_t filter;
+    shr_mac_t mac1 = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55};
+    int queue_num = 20;
+    ...
+    /* create a filter to forward (DMAC = mac1) packets to netif 1 */
+    memset(&filter, 0, sizeof(filter));
+    filter.type = BCMPKT_FILTER_T_RX_PKT;
+    filter.priority = 1;
+    filter.dest_type = BCMPKT_DEST_T_NETIF;
+    filter.dest_id = 1;
+    filter.match_flags = BCMPKT_FILTER_M_RAW;
+    filter.dma_chan = rx_ch;
+    filter.raw_size = 6;
+    memcpy(filter.m_raw_data, mac1, 6);
+    memset(filter.m_raw_mask, 0xff, 6);
+    bcmpkt_filter_create(unit, &filter);
+
+    /* create a filter to forward packets from RX queue 20 to netif 2 */
+    memset(&filter, 0, sizeof(filter));
+    filter.type = BCMPKT_FILTER_T_RX_PKT;
+    filter.priority = 99;
+    filter.dest_type = BCMPKT_DEST_T_NETIF;
+    filter.dest_id = 2;
+    filter.match_flags = BCMPKT_FILTER_M_CPU_QUEUE;
+    filter.m_cpu_queue = queue_num;
+    filter.dma_chan = rx_ch;
+    bcmpkt_filter_create(unit, &filter);
+    ...
+}
+\endcode
+
+For a complete KNET API's description, please refer to \ref bcmpkt_knet.h.
+
+\section bcmpkt_unet UNET Management
+
+Same as KNET, the UNET (User-mode Networking) API is designed for Linux OS only.
+The KNET is design for Linux Kernel network data-path management, while the
+UNET is designed for Linux User mode network data-path management. The KNET
+forwards packets to a netif and UNET is used for creating BCMPKT TX and RX on
+the netif though raw socket and so the application may send packets to
+the netif or receive packets from the netif. Currently, UNET is implemented
+above packet_mmap. The application may call \ref bcmpkt_unet_create to create
+a UNET on a netif. Then, the \ref bcmpkt_tx and \ref bcmpkt_rx_register API
+could be used for transmit or receive packets associated with this netif.
+
+Sample code for UNET creating.
+\code{.c}
+void my_create_unet(void)
+{
+    int unit = 1;
+    int netif_id = 1;
+    ...
+    /* Create UNET on a netif. */
+    bcmpkt_unet_create(unit, netif_id);
+    ...
+}
+\endcode
+
+For a complete UNET API's description, please refer to \ref bcmpkt_unet.h.
+
+\section bcmpkt_net Packet Transmit and Receive
+
+The NET API defines packet transmit (TX) API and packet receive (RX) callback
+registration API. TX and RX are defined from the perspective of external Host
+CPU.
+
+The \ref bcmpkt_packet_t is the structure for packet TX or RX processing.
+Packet structure consists of packet data buffer and packet metadata. Packet
+data buffer is for packet raw data. The buffer supports headroom and tail room,
+which could benefit packet header changes or add extra payload in the process
+of transmit without buffer re-allocating. When sending a packet to a specific
+port or to CPU Higig IPIPE, SDK requests an extra space (e.g. 80 bytes) before
+packet data to hold forwarding metadata. If packet buffer is allocated through
+\ref bcmpkt_alloc API, the function will reserve a space internally and the
+space won't be touched except \ref bcmpkt_tx function, and the application
+doesn't need to worry about it. There are three types packet metadata, TX
+forwarding meta (TXPMD), RX forwarding metadata (RXPMD) and Higig header.
+About packet meta-data detail information, refer to \ref bcmpkt_utility for
+details.
+
+\subsection packet_tx Packet Transmit
+
+The \ref bcmpkt_tx is for host CPU transmitting packets. There are four paths,
+Ethernet path, Higig path, Higig2 path and Stream of Bytes (SOB, PIPE bypass)
+path, in CPU port ingress. The SOB path is used for forwarding host packets to
+a local port directly. Except Ethernet path, all others request the application
+to configure packet metadata (TXPMD and/or Higig) before calling
+\ref bcmpkt_tx.
+
+The \ref bcmpkt_tx is per 'unit' per 'netif'. For KNET mode, the \ref bcmpkt_tx
+works on the netif on which a UNET was created only. For other mode, the
+'netif' parameter will be ignored by both TX and RX.
+
+Below is an sample code about generating a packet and forward to a panel port.
+\code{.c}
+#define _TEST_PACKET_SIZE 1200
+#define _RESERVE_SPACE_HEAD 64
+#define _RESERVE_SPACE_END  64
+#define _RESERVE_SPACE      (_RESERVE_SPACE_HEAD + _RESERVE_SPACE_END)
+#define _TEST_VLAN          1
+#define _TEST_TPID          0x888e
+#define _TEST_ETHERTYPE     0xFFFF
+#define _TXPMD_START_IHEADER 2
+#define _TXPMD_HEADER_TYPE_FROM_CPU 1
+void my_tx(void)
+{
+    int unit = 0;
+    uint32_t dev_type;
+    bcmpkt_packet_t *packet = NULL;
+    /* The netif should have already been created */
+    int netif_id = 1;
+    int port = 1;
+    int len = _TEST_PACKET_SIZE;
+    bcmpkt_netif_t netif;
+    uint32_t *txpmd = NULL;
+    uint8_t *data;
+    shr_mac_t _macd = {0x00, 0x00, 0x22, 0x33, 0x44, 0x55};
+    ...
+    /* get default netif setting */
+    memset(&netif, 0, sizeof(netif));
+    bcmpkt_netif_get(unit, netif_id, &netif);
+
+    /* Allocate packet buffer and initial packet object */
+    bcmpkt_alloc(BCMPKT_BPOOL_SHARED_ID, len + _RESERVE_SPACE, BCMPKT_BUF_F_TX,  &packet);
+    if (packet == NULL) {
+        printf("bcmpkt_alloc failed!\n");
+        return;
+    }
+    bcmpkt_reserve(packet->data_buf, _RESERVE_SPACE_HEAD);
+    bcmpkt_put(packet->data_buf, _TEST_PACKET_SIZE);
+
+    data = BCMPKT_PACKET_DATA(packet);
+    memcpy(data, _macd, 6);
+    memcpy(data + 6, netif.mac_addr, 6);
+    data[12] = _TEST_TPID >> 8;
+    data[13] = _TEST_TPID & 0xff;
+    data[14] = _TEST_VLAN >> 8;
+    data[15] = _TEST_VLAN & 0xff;
+    data[16] = _TEST_ETHERTYPE >> 8;
+    data[17] = _TEST_ETHERTYPE & 0xff;
+    /* Pad content */
+    ...
+
+    /* Configure TXPMD information */
+    bcmpkt_dev_type_get(unit, &dev_type);
+    bcmpkt_txpmd_get(packet, &txpmd);
+    /* Configure start as internal header */
+    bcmpkt_txpmd_field_set(dev_type, txpmd,
+                           BCMPKT_TXPMD_START, _TXPMD_START_IHEADER);
+    /* Configure header type to From CPU */
+    bcmpkt_txpmd_field_set(dev_type, txpmd,
+                           BCMPKT_TXPMD_HEADER_TYPE, _TXPMD_HEADER_TYPE_FROM_CPU);
+    /* Configure unicast attribution */
+    bcmpkt_txpmd_field_set(dev_type, txpmd,
+                           BCMPKT_TXPMD_UNICAST, 1);
+    /* Configure forward destination port */
+    bcmpkt_txpmd_field_set(dev_type, txpmd,
+                           BCMPKT_TXPMD_LOCAL_DEST_PORT, port);
+
+    bcmpkt_tx(unit, netif_id, packet);
+    bcmpkt_free(unit, packet);
+    ...
+}
+\endcode
+
+\subsection packet_rx Packet Receive
+
+The \ref bcmpkt_rx_register function is for an applications to register its
+callback function to receive its packets. Each RX packet has its self packet
+metadata, rxpmd and Higig. The application may use bcmpkt_rxpmd APIs and Higig
+macros to parser its forwarding information.
+
+The \ref bcmpkt_rx_register is per 'unit' per 'netif'. For KNET mode, the
+\ref bcmpkt_rx_register works on the netif on which a UNET was created only.
+For other mode, the 'netif' parameter will be ignored by both TX and RX.
+
+Only one callback function is supported for each RX. If multiple applications
+share one RX, the application must dispatch packets above callback function.
+
+RX sample code:
+\code{.c}
+static void my_rx_callback(int unit, int netif_id, bcmpkt_packet_t *packet, void *cookie)
+{
+    uint32_t dev_type;
+    uint32_t value;
+    uint32_t *rxpmd = NULL;
+    ...
+
+    /* Handle packets */
+    bcmpkt_dev_type_get(unit, &dev_type);
+    bcmpkt_rxpmd_get(packet, &rxpmd);
+    bcmpkt_rxpmd_field_get(dev_type, rxpmd, BCMPKT_RXPMD_CPU_COS, &value);
+    if (value == 8) {
+        ...
+    }
+}
+void my_callback_register(int unit, int netif_id)
+{
+    /* register to default netif, 0 is the default netif ID. */
+    bcmpkt_rx_register(unit, netif_id, 0, my_rx_callback, NULL);
+}
+\endcode
+
+For a complete TX and RX description, please refer to \ref bcmpkt_net.h.
+
+\section bcmpkt_utility Packet Utility
+
+The Packet Utility contains some tools for packet processing. The tools
+consist of
+    - \ref bcmpkt_buf
+    - \ref bcmpkt_txpmd
+    - \ref bcmpkt_rxpmd
+    - \ref bcmpkt_higig
+
+\subsection bcmpkt_buf Packet Buffer Library
+
+The packet buffer library consists of buffer pool management, buffer alloc
+and free, data buffer operations and packet operations.
+
+There are two types of packet data buffer pools, shared buffer pool and per
+device buffer pool. The 'unit = \ref BCMPKT_BPOOL_SHARED_ID' is for shared buffer
+pool access. The shared buffer pool is built on non-DMA memory, while the
+device buffer pools are built on DMA memory. The device buffer pool is suggested
+for CNET mode only. In CNET mode, if a TX packet buffer does not belong to
+the device's buffer pool, the API will allocate a new buffer from the
+device's buffer pool and copy the data into it.
+In CNET mode, the device buffer pool must be set up before the device is
+enabled.
+
+The 'unit' in \ref bcmpkt_packet_t is used to log data buffer pool
+unit number, which is used for the buffer release. If the buffer was
+allocated from \ref bcmpkt_data_buf_alloc or \ref bcmpkt_data_buf_copy,
+the must ensure the 'unit' is correct when the buffer is released.
+
+In normal packet transmission, the caller is responsible for releasing the
+buffer. In TX, the application should call \ref bcmpkt_free to release the
+packet buffer after calling \ref bcmpkt_tx. In RX, the application should not
+release the packet buffer in its callback. The application should use
+\ref bcmpkt_packet_clone or \ref bcmpkt_packet_claim in order to use the
+received packet outside of the RX callback.
+
+Buffer management sample code:
+
+\code{.c}
+int my_buffer(void)
+{
+#define HEADROOM_SIZE     64
+#define TAILROOM_SIZE     64
+#define _TEST_VLAN        10
+#define _TEST_TPID        0x888e
+    int unit = 0;
+    int len = 1000;
+    uint8_t *data;
+    shr_mac_t smac = {0x0, 0x0, 0x1,}, dmac = {0x0, 0x0, 0x2,};
+    bcmpkt_packet_t *packet = NULL;
+
+    /* Create shared buffer pool. */
+    bcmpkt_bpool_create(BCMPKT_BPOOL_SHARED_ID, 9216, 512);
+
+    /* Create packet pool. */
+    bcmpkt_ppool_create(BCMPKT_PPOOL_COUNT_DEF);
+
+    /* Allocate packet object and its data buffer. */
+    bcmpkt_alloc(BCMPKT_BPOOL_SHARED_ID, len + HEADROOM_SIZE + TAILROOM_SIZE,
+                 BCMPKT_BUF_F_TX, &packet);
+
+    /* Reserve Headroom size. */
+    bcmpkt_reserve(packet->data_buf, HEADROOM_SIZE);
+
+    /* Fill packet content. */
+    if (bcmpkt_put(packet->data_buf, len) == NULL) {
+        return -1;
+    }
+    data = BCMPKT_PACKET_DATA(packet);
+    memcpy(data, dmac, 6);
+    memcpy(data, smac, 6);
+    ...
+
+    /* Changing packet content, e.g. inserting VLAN tag. */
+    if (bcmpkt_push(packet->data_buf, 4) == NULL) {
+        return -1;
+    }
+    data = BCMPKT_PACKET_DATA(packet);
+    /* Move MACs. */
+    memcpy(data, data + 4, 12);
+    /* Fill the tag. */
+    data[12] = _TEST_TPID >> 8;
+    data[13] = _TEST_TPID & 0xff;
+    data[14] = _TEST_VLAN >> 8;
+    data[15] = _TEST_VLAN & 0xff;
+    ...
+
+    bcmpkt_free(unit, packet);
+    return 0;
+}
+\endcode
+
+For a complete BCMPKT buf API's description, please refer to \ref bcmpkt_buf.h.
+
+\subsection bcmpkt_txpmd TXPMD Library
+
+TXPMD (TX Packet Metadata, which is called SOBMH in hardware) API is used
+to encode TXPMD header when forwarding a packet to a local port directly.
+
+Below is sample code for TXPMD configuration.
+\code{.c}
+#define _TXPMD_START_IHEADER 2
+#define _TXPMD_HEADER_TYPE_FROM_CPU 1
+void my_txpmd_set(uint32_t unit, bcmpkt_packet_t *packet)
+{
+    uint32_t *txpmd = NULL;
+    uint32_t dev_type;
+    int port = 1;
+
+    /* Get device type. */
+    bcmpkt_dev_type_get(unit, &dev_type);
+
+    /* Get TXPMD handle */
+    bcmpkt_txpmd_get(packet, &txpmd);
+    /* Configure start as internal header */
+    bcmpkt_txpmd_field_set(dev_type, txpmd,
+                           BCMPKT_TXPMD_START, _TXPMD_START_IHEADER);
+    /* Configure header type to From CPU */
+    bcmpkt_txpmd_field_set(dev_type, txpmd,
+                           BCMPKT_TXPMD_HEADER_TYPE, TXPMD_HEADER_TYPE_FROM_CPU);
+    /* Configure unicast attribution */
+    bcmpkt_txpmd_field_set(dev_type, txpmd,
+                           BCMPKT_TXPMD_UNICAST, 1);
+    /* Configure forward destination port */
+    bcmpkt_txpmd_field_set(dev_type, txpmd,
+                           BCMPKT_TXPMD_LOCAL_DEST_PORT, port);
+    ...
+}
+\endcode
+For a complete TXPMD API's description, please refer to \ref bcmpkt_txpmd.h.
+
+\subsection bcmpkt_rxpmd RXPMD Library
+
+RXPMD (RX Packet MetaData, which is called EP_TO_CPU in hardware) API is for
+decoding RX packet metadata. Most of fields are simple and just need to get
+its value. There are some complex fields, which need extra parsing. The
+\ref bcmpkt_rxpmd_reasons_get is used for getting packet RX reasons. For Higig
+information, the application needs to call \ref bcmpkt_rxpmd_mh_get to get
+Higig handler and use Higig macros to parser each field.
+
+Below are sample code for RXPMD configuration.
+\code{.c}
+void my_rxpmd_get(int unit, bcmpkt_packet_t *packet)
+{
+    uint32_t *rxpmd = NULL;
+    uint32_t dev_type;
+    uint32_t cpu_cos;
+    uint32_t src_port;
+
+    /* Get device type. */
+    bcmpkt_dev_type_get(unit, &dev_type);
+    /* Get RXPMD handle */
+    bcmpkt_rxpmd_get(packet, &rxpmd);
+    /* Get each field information */
+    bcmpkt_rxpmd_field_get(dev_type, rxpmd,
+                           BCMPKT_RXPMD_CPU_COS, &cpu_cos);
+    bcmpkt_rxpmd_field_get(dev_type, rxpmd,
+                           BCMPKT_RXPMD_SRC_PORT_NUM, &src_port);
+    ...
+}
+\endcode
+For a complete RXPMD API's description, please refer to \ref bcmpkt_rxpmd.h.
+
+\subsection bcmpkt_higig Higig Macros
+
+SDK provides a set of Higig macros for Higig operations' convenience. Below
+is an example of encapsulating a Higig header for TX.
+\code{.c}
+void my_higig_encap(uint32_t unit, bcmpkt_packet_t *packet)
+{
+    HIGIG_t2 *mh;
+    ...
+    bcmpkt_higig_get(packet, (uint32_t *)&mh);
+    HIGIG2_STARTf_SET(*mh, BCMPKT_HIGIG2_SOF);
+    HIGIG2_PPD_TYPEf_SET(*mh, 2);
+    HIGIG2_PPD2_OPCODEf_SET(*mh, HIGIG_OP_UC);
+    ...
+}
+\endcode
+For a complete Higig macros' description, please refer to bcmpkt_higig_defs.h.
+
+
+\section bcmpkt_build Build
+
+The makefile for the SDK Packet I/O library is built upon the make
+include files in the <tt>$SDK/make</tt> directory.
+
+*/

@@ -1,0 +1,276 @@
+#
+# file: front_e_ha.yml
+# In memory front end YAML file describing the HA data structures
+#
+
+#
+# Copyright: (c) 2018 Broadcom. All Rights Reserved. "Broadcom" refers to 
+# Broadcom Limited and/or its subsidiaries.
+# 
+# Broadcom Switch Software License
+# 
+# This license governs the use of the accompanying Broadcom software. Your 
+# use of the software indicates your acceptance of the terms and conditions 
+# of this license. If you do not agree to the terms and conditions of this 
+# license, do not use the software.
+# 1. Definitions
+#    "Licensor" means any person or entity that distributes its Work.
+#    "Software" means the original work of authorship made available under 
+#    this license.
+#    "Work" means the Software and any additions to or derivative works of 
+#    the Software that are made available under this license.
+#    The terms "reproduce," "reproduction," "derivative works," and 
+#    "distribution" have the meaning as provided under U.S. copyright law.
+#    Works, including the Software, are "made available" under this license 
+#    by including in or with the Work either (a) a copyright notice 
+#    referencing the applicability of this license to the Work, or (b) a copy 
+#    of this license.
+# 2. Grant of Copyright License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    copyright license to reproduce, prepare derivative works of, publicly 
+#    display, publicly perform, sublicense and distribute its Work and any 
+#    resulting derivative works in any form.
+# 3. Grant of Patent License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    patent license to make, have made, use, offer to sell, sell, import, and 
+#    otherwise transfer its Work, in whole or in part. This patent license 
+#    applies only to the patent claims licensable by Licensor that would be 
+#    infringed by Licensor's Work (or portion thereof) individually and 
+#    excluding any combinations with any other materials or technology.
+#    If you institute patent litigation against any Licensor (including a 
+#    cross-claim or counterclaim in a lawsuit) to enforce any patents that 
+#    you allege are infringed by any Work, then your patent license from such 
+#    Licensor to the Work shall terminate as of the date such litigation is 
+#    filed.
+# 4. Redistribution
+#    You may reproduce or distribute the Work only if (a) you do so under 
+#    this License, (b) you include a complete copy of this License with your 
+#    distribution, and (c) you retain without modification any copyright, 
+#    patent, trademark, or attribution notices that are present in the Work.
+# 5. Derivative Works
+#    You may specify that additional or different terms apply to the use, 
+#    reproduction, and distribution of your derivative works of the Work 
+#    ("Your Terms") only if (a) Your Terms provide that the limitations of 
+#    Section 7 apply to your derivative works, and (b) you identify the 
+#    specific derivative works that are subject to Your Terms. 
+#    Notwithstanding Your Terms, this license (including the redistribution 
+#    requirements in Section 4) will continue to apply to the Work itself.
+# 6. Trademarks
+#    This license does not grant any rights to use any Licensor's or its 
+#    affiliates' names, logos, or trademarks, except as necessary to 
+#    reproduce the notices described in this license.
+# 7. Limitations
+#    Platform. The Work and any derivative works thereof may only be used, or 
+#    intended for use, with a Broadcom switch integrated circuit.
+#    No Reverse Engineering. You will not use the Work to disassemble, 
+#    reverse engineer, decompile, or attempt to ascertain the underlying 
+#    technology of a Broadcom switch integrated circuit.
+# 8. Termination
+#    If you violate any term of this license, then your rights under this 
+#    license (including the license grants of Sections 2 and 3) will 
+#    terminate immediately.
+# 9. Disclaimer of Warranty
+#    THE WORK IS PROVIDED "AS IS" WITHOUT WARRANTIES OR CONDITIONS OF ANY 
+#    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WARRANTIES OR CONDITIONS OF 
+#    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE OR 
+#    NON-INFRINGEMENT. YOU BEAR THE RISK OF UNDERTAKING ANY ACTIVITIES UNDER 
+#    THIS LICENSE. SOME STATES' CONSUMER LAWS DO NOT ALLOW EXCLUSION OF AN 
+#    IMPLIED WARRANTY, SO THIS DISCLAIMER MAY NOT APPLY TO YOU.
+# 10. Limitation of Liability
+#    EXCEPT AS PROHIBITED BY APPLICABLE LAW, IN NO EVENT AND UNDER NO LEGAL 
+#    THEORY, WHETHER IN TORT (INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE 
+#    SHALL ANY LICENSOR BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY DIRECT, 
+#    INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF 
+#    OR RELATED TO THIS LICENSE, THE USE OR INABILITY TO USE THE WORK 
+#    (INCLUDING BUT NOT LIMITED TO LOSS OF GOODWILL, BUSINESS INTERRUPTION, 
+#    LOST PROFITS OR DATA, COMPUTER FAILURE OR MALFUNCTION, OR ANY OTHER 
+#    COMMERCIAL DAMAGES OR LOSSES), EVEN IF THE LICENSOR HAS BEEN ADVISED OF 
+#    THE POSSIBILITY OF SUCH DAMAGES.
+# 
+# 
+#
+consts:
+   MAX_TABLE_NAME: 40
+
+component:
+   bcmimm_fe:
+       field_info_t:
+           type: struct
+           attrib:
+               version: 1
+           fields:
+               fid:
+                   type: uint32_t
+                   comment: Field ID
+               width:
+                   type: uint32_t
+                   comment: Field data width (bits)
+               def_val:
+                   type: uint64_t
+                   comment: The data default value
+               min_val:
+                   type: uint64_t
+                   comment: The data minimal value
+               max_val:
+                   type: uint64_t
+                   comment: The data maximal value
+               read_only:
+                   type: bool
+                   comment: Indicates if the field is read only
+
+       table_info_t:
+           type: struct
+           attrib:
+               version: 1
+           fields:
+               sid:
+                   type: uint32_t
+                   comment: Table ID
+               sub:
+                   type: uint8_t
+                   comment: The sub module ID
+               array_idx_size:
+                   type: uint8_t
+                   comment: The size of the array index
+               key_fld_cnt:
+                   type: uint8_t
+                   comment: Number of key fields
+               key_arry_size:
+                   type: uint8_t
+                   comment: Total number of key bits
+               key_bits:
+                   type: uint32_t
+                   comment: Offset to buffer containing the key bits
+               blk_hdl:
+                   type: uint32_t
+                   comment: Backend block handle
+               key_fields:
+                   type: field_info_t *
+                   comment: List of key fields and their size
+               data_fields:
+                   type: field_info_t *
+                   comment: Data field array
+               data_bits:
+                   type: uint32_t
+                   comment: Offset to buffer containing the entire data entry
+               data_bits_len:
+                   type: uint16_t
+                   comment: The memory size of data_bits (bytes) includes FID & del indication
+               max_num_field:
+                   type: uint16_t
+                   comment: Maximal number of data fields in entry
+               data_fld_cnt:
+                   type: uint16_t
+                   comment: Number of data field
+               f_data_size:
+                   type: uint8_t
+                   comment: The data size of a single field
+               pending_ops:
+                   type: uint8_t
+                   comment: The number of pending operations (during trans)
+               interactive:
+                   type: bool
+                   comment: Indicate if table type is interactive
+               trans_id:
+                   type: uint32_t
+                   comment: On-going transaction ID
+               default_tbl_size:
+                   type: uint32_t
+                   comment: The table_size attribute value
+               tbl_name:
+                   type: char
+                   length: MAX_TABLE_NAME
+                   comment:  Table name
+
+       generic_array_blk_t:
+           type: struct
+           attrib:
+               version: 1
+           fields:
+               signature:
+                   type: uint32_t
+                   comment: Block validation
+               free_offset:
+                   type: uint32_t
+                   comment: The offset of the next available item
+               blk_size:
+                   type: uint32_t
+                   comment: Total data length of the block
+               syc_obj:
+                   type: void *
+                   comment: Mutex protecting the block from multiple changes
+
+       imm_ha_blk_t:
+           type: struct
+           attrib:
+               version: 1
+           fields:
+               signature:
+                   type: uint32_t
+                   comment: Block validation
+               free_idx:
+                   type: uint32_t
+                   comment: The index of the next available item
+               array_size:
+                   type: uint32_t
+                   comment: How many tables can be allocated
+               allocated:
+                   type: uint32_t
+                   comment: How many tables had been allocated
+               data_blk:
+                   type: uint8_t *
+                   comment: (Real) Pointer to the data block
+               key_blk:
+                   type: uint8_t *
+                   comment: (Real) Pointer to the key block
+               aux_blk:
+                   type: uint8_t *
+                   comment: (Real) Pointer to the auxilury data block
+               trans_blk:
+                   type: uint8_t *
+                   comment: (Real) Pointer to the transaction control block
+               tbl:
+                  type: table_info_t
+                  table:
+                  size: array_size
+                  comment: table info array
+
+       imm_trans_elem_t:
+           type: struct
+           attrib:
+               version: 1
+           fields:
+               sub:
+                   type: uint32_t
+                   comment: Table sub module ID
+               data:
+                   type: uint32_t
+                   comment: Pointer (HA) to the data portion
+               key:
+                   type: uint32_t
+                   comment: Pointer (HA) to the key portion
+
+       imm_trans_info_t:
+           type: struct
+           attrib:
+               version: 1
+           fields:
+               start_idx:
+                   type: uint32_t
+                   comment: start trans element index
+               trans_id:
+                   type: uint32_t
+                   comment: Transaction ID
+               unit:
+                   type: int
+                   comment: Unit associated with the transaction
+               elem_cnt:
+                   type: uint32_t
+                   comment: Total elements in transaction
+               elem:
+                  type: imm_trans_elem_t
+                  table:
+                  size: elem_cnt
+                  comment: List of transaction elements

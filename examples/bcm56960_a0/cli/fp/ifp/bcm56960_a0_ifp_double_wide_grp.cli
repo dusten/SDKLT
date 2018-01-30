@@ -1,0 +1,302 @@
+#
+# Copyright: (c) 2018 Broadcom. All Rights Reserved. "Broadcom" refers to 
+# Broadcom Limited and/or its subsidiaries.
+# 
+# Broadcom Switch Software License
+# 
+# This license governs the use of the accompanying Broadcom software. Your 
+# use of the software indicates your acceptance of the terms and conditions 
+# of this license. If you do not agree to the terms and conditions of this 
+# license, do not use the software.
+# 1. Definitions
+#    "Licensor" means any person or entity that distributes its Work.
+#    "Software" means the original work of authorship made available under 
+#    this license.
+#    "Work" means the Software and any additions to or derivative works of 
+#    the Software that are made available under this license.
+#    The terms "reproduce," "reproduction," "derivative works," and 
+#    "distribution" have the meaning as provided under U.S. copyright law.
+#    Works, including the Software, are "made available" under this license 
+#    by including in or with the Work either (a) a copyright notice 
+#    referencing the applicability of this license to the Work, or (b) a copy 
+#    of this license.
+# 2. Grant of Copyright License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    copyright license to reproduce, prepare derivative works of, publicly 
+#    display, publicly perform, sublicense and distribute its Work and any 
+#    resulting derivative works in any form.
+# 3. Grant of Patent License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    patent license to make, have made, use, offer to sell, sell, import, and 
+#    otherwise transfer its Work, in whole or in part. This patent license 
+#    applies only to the patent claims licensable by Licensor that would be 
+#    infringed by Licensor's Work (or portion thereof) individually and 
+#    excluding any combinations with any other materials or technology.
+#    If you institute patent litigation against any Licensor (including a 
+#    cross-claim or counterclaim in a lawsuit) to enforce any patents that 
+#    you allege are infringed by any Work, then your patent license from such 
+#    Licensor to the Work shall terminate as of the date such litigation is 
+#    filed.
+# 4. Redistribution
+#    You may reproduce or distribute the Work only if (a) you do so under 
+#    this License, (b) you include a complete copy of this License with your 
+#    distribution, and (c) you retain without modification any copyright, 
+#    patent, trademark, or attribution notices that are present in the Work.
+# 5. Derivative Works
+#    You may specify that additional or different terms apply to the use, 
+#    reproduction, and distribution of your derivative works of the Work 
+#    ("Your Terms") only if (a) Your Terms provide that the limitations of 
+#    Section 7 apply to your derivative works, and (b) you identify the 
+#    specific derivative works that are subject to Your Terms. 
+#    Notwithstanding Your Terms, this license (including the redistribution 
+#    requirements in Section 4) will continue to apply to the Work itself.
+# 6. Trademarks
+#    This license does not grant any rights to use any Licensor's or its 
+#    affiliates' names, logos, or trademarks, except as necessary to 
+#    reproduce the notices described in this license.
+# 7. Limitations
+#    Platform. The Work and any derivative works thereof may only be used, or 
+#    intended for use, with a Broadcom switch integrated circuit.
+#    No Reverse Engineering. You will not use the Work to disassemble, 
+#    reverse engineer, decompile, or attempt to ascertain the underlying 
+#    technology of a Broadcom switch integrated circuit.
+# 8. Termination
+#    If you violate any term of this license, then your rights under this 
+#    license (including the license grants of Sections 2 and 3) will 
+#    terminate immediately.
+# 9. Disclaimer of Warranty
+#    THE WORK IS PROVIDED "AS IS" WITHOUT WARRANTIES OR CONDITIONS OF ANY 
+#    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WARRANTIES OR CONDITIONS OF 
+#    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE OR 
+#    NON-INFRINGEMENT. YOU BEAR THE RISK OF UNDERTAKING ANY ACTIVITIES UNDER 
+#    THIS LICENSE. SOME STATES' CONSUMER LAWS DO NOT ALLOW EXCLUSION OF AN 
+#    IMPLIED WARRANTY, SO THIS DISCLAIMER MAY NOT APPLY TO YOU.
+# 10. Limitation of Liability
+#    EXCEPT AS PROHIBITED BY APPLICABLE LAW, IN NO EVENT AND UNDER NO LEGAL 
+#    THEORY, WHETHER IN TORT (INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE 
+#    SHALL ANY LICENSOR BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY DIRECT, 
+#    INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF 
+#    OR RELATED TO THIS LICENSE, THE USE OR INABILITY TO USE THE WORK 
+#    (INCLUDING BUT NOT LIMITED TO LOSS OF GOODWILL, BUSINESS INTERRUPTION, 
+#    LOST PROFITS OR DATA, COMPUTER FAILURE OR MALFUNCTION, OR ANY OTHER 
+#    COMMERCIAL DAMAGES OR LOSSES), EVEN IF THE LICENSOR HAS BEEN ADVISED OF 
+#    THE POSSIBILITY OF SUCH DAMAGES.
+# 
+# 
+#
+
+################################################################################
+#
+# Purpose: CLI example to show configuration of IFP [Ingress Field Processor] in
+# pipe local mode.
+#
+
+# Description: Group 1  - Qualifiers [Inport, destination IP address, DSCP, IP
+#                                     protocol and L4 destination port]
+#                         and double mode
+#              Rule 1   - Inport: 0x1
+#                         Destination IPv4 address: 192.168.01.20
+#                         DSCP: 0x18
+#                         IP protocol: 17
+#                         L4 destination port: 554
+#              Policy 1 - New COSQ new and new DSCP
+#              Entry 1  - Associate Rule 1, Policy 1 with Entry 1 in Group 1
+#
+# Notes: Pipe local mode is set through logical table "FP_CONFIG" and this LT
+#        can be configured only through configuration file and below is the
+#        config for reference.
+#        ---
+#        device:
+#            0:
+#                FP_CONFIG:
+#                    FP_ING_OPERMODE: PIPE_UNIQUE
+#        ...
+#
+#        The "pipe" can be selected through "PIPE" field of
+#        "FP_ING_GRP_TEMPLATE" LT. The FP configurations works only on the ports
+#        of the configured pipe.
+#
+# The initial steps of setting up packet IO, mapping queues to channel, starting
+# packet watcher, configuring port in loopback, checking link status of ports,
+# configuring VLAN STG, MAC counters, creating VLAN, adding my station tcam
+# entry, creating L3 interface, Next hop objects and adding a host entry are for
+# validating the functionality of the FP script.
+# The next five steps configure IFP with the above description set. Finally a
+# packet is sent from port 1 to match the configuration and it gets routed to
+# the configured port with New DSCP and COSQ.
+#
+# Setup diagram:
+#                +--------------------------------------------+
+#                |                                            |
+#                |                 BCM56960                   |
+#                |                                            |
+#                |  IFP                                       |
+#                |  Qualifiers: Inport - 1                    |
+#                |              Dst IPv4 addr - 0xC0A80114    |
+#                |              DSCP - 0x18                   |
+# +------------->|              IP protocol - 17              +------------>
+#      Port 1    |              L4 dest port - 554            | Port 2
+#                |                                            |
+#                |                                            |
+#                |  Actions: COSQ New - 2                     |
+#                |           DSCP New - 9                     |
+#                |                                            |
+#                +--------------------------------------------+
+#
+# Ingress port(s): 1.
+#
+# Egress port(s): 2.
+#
+# Egress CoS queue: 2.
+#
+# Device: bcm56960_a0
+#
+# NGSDK Version: 0.9
+#
+# Verification method: Packet sampling is enabled to capture the forwarded
+# packet on port 2 and check if it is as below with New DSCP[0x24].
+#
+# Watch information: (interface 1)
+# [RX metadata information]
+# 	      HGI                             :2
+# 	      PKT_LENGTH                      :72
+# 	      SRC_PORT_NUM                    :2
+# 	      OUTER_VID                       :3
+#             SPECIAL_PACKET_TYPE             :1
+#	      DSCP                            :9
+# 	      TIMESTAMP_TYPE                  :3
+# 	      SWITCH                          :1
+# 	      INCOMING_TAG_STATUS             :2
+# [RX reasons]
+# 	      CPU_SFLOW_SRC
+# Packet raw data (68):
+# 0000: 00 00 00 00 00 0b 00 00 - 00 aa aa aa 81 00 00 03
+# 0010: 08 00 45 24 00 2e 00 00 - 00 00 3f 11 a5 c1 0a 0a
+# 0020: 0a 14 c0 a8 01 14 1a 80 - 02 2a 00 1a c4 e4 00 01
+# 0030: 02 03 04 05 06 07 08 09 - 0a 0b 0c 0d 0e 0f 10 11
+# 0040: dc 7e f2 19
+#
+################################################################################
+
+# Setup packet IO from diag shell.
+pktdev init
+
+# Map all queues to channel 1.
+pktdev chan queuemap 1 highword=0xffff lowword=0xffffffff
+
+# Start packet watcher.
+rx watcher create
+
+# Enable Link Manager(linkscan task).
+lt LM_CONTROL insert SCAN_ENABLE=1
+
+# Configure software linkscan mode for ports 1-2.
+for port=1,2 'lt LM_PORT_CONTROL insert PORT_ID=$port LINKSCAN_MODE=SOFTWARE'
+
+# Configure ports 1-2 and put them in loopback mode.
+for port=1,2 'lt PC_PORT update PORT_ID=$port LOOPBACK_MODE=PC_LPBK_MAC'
+
+# Allow Link Manager to collect status of the ports 1-2.
+# Default Link Manager scan interval is 250 ms.
+sleep quiet 3
+
+# Check status of the ports 1-2. LINK_STATE=1 indicates port is UP.
+for port=1,2 'lt LM_LINK_STATE lookup PORT_ID=$port'
+
+# Put ports 1-2 in forwarding state.
+lt VLAN_STG insert VLAN_STG_ID=1 STATE[1-2]=FORWARD
+
+# Add VLAN tag for untagged packets.
+lt VLAN_ING_TAG_ACTION_PROFILE insert VLAN_ING_TAG_ACTION_PROFILE_ID=1 \
+                                      UT_OTAG=ADD
+
+# Enable MAC counters for ports 1-2.
+for port=1,2 'lt CTR_MAC insert PORT_ID=$port'
+
+# Create VLAN 2 and include port 1.
+lt VLAN insert VLAN_ID=2 EGR_MEMBER_PORTS=2 ING_MEMBER_PORTS=2 VLAN_STG_ID=1 \
+               L3_IIF_ID=2
+
+# Create VLAN 3 and include port 2.
+lt VLAN insert VLAN_ID=3 EGR_MEMBER_PORTS=4 ING_MEMBER_PORTS=4 VLAN_STG_ID=1 \
+               L3_IIF_ID=2
+
+# Configure MTU to be max for VLANs 2-3.
+for vlan=2,3 'lt L3_UC_MTU insert VLAN_ID=$vlan L3_MTU=0x3fff'
+
+# Enable IPv4 routing on port 1.
+lt PORT insert PORT_ID=1 V4L3=1 PORT_TYPE=ETHERNET MY_MODID=0 \
+               VLAN_ING_TAG_ACTION_PROFILE_ID=1 ING_OVID=2
+
+# Configure VLAN_OUTER_TPID and PORT_POLICY tables to qualify outer tagged
+# packets.
+lt VLAN_OUTER_TPID insert VLAN_OUTER_TPID_ID=0 ING_TPID=0x8100 EGR_TPID=0x8100
+
+# Classify packets with value 0x8100 at bytes 12,13 as outer VLAN tagged packet.
+for port=1,2 'lt PORT_POLICY insert PORT_ID=$port PASS_ON_OUTER_TPID_MATCH[0]=1'
+
+# Create L3_IIF_PROFILE 1 and enable IPv4 routing.
+lt L3_IIF_PROFILE insert L3_IIF_PROFILE_ID=1 IPV4_UC=1
+
+# Create L3_IIF index 2 and set VRF_ID=0.
+lt L3_IIF insert L3_IIF_ID=2 VRF_ID=0 L3_IIF_PROFILE_ID=1
+
+# Program L2_MY_STATION to enable routing for MAC address:0x2 and VLAN:0x2.
+lt L2_MY_STATION insert VLAN_ID=2 VLAN_ID_MASK=0xfff MAC_ADDR=0x2 \
+                        MAC_ADDR_MASK=0xffffffffffff IPV4_TERMINATION=1
+
+# Create L3 interface.
+lt L3_EIF insert L3_EIF_ID=2 VLAN_ID=3 MAC_SA=0x000000AAAAAA
+
+# Create L3 nexthop.
+lt L3_UC_NHOP insert NHOP_ID=2 MODPORT=2 MODID=0 VLAN_ID=3 L3_EIF_ID=2 \
+                     MAC_DA=0x00000000000B
+
+# Create L3 host entry.
+lt L3_IPV4_UC_HOST insert IPV4=0xC0A80114 VRF_ID=0 ECMP_NHOP=0 NHOP_ID=2
+
+# FP configuration starts with the below steps.
+# ---------------------------------------------
+
+# Enable IFP on port 1.
+lt PORT_FP insert PORT_ID=1 FP_ING=1
+
+# Create IFP Group 1 with Qset [ InPort, Dst IPv4, DSCP, IP Protocol and L4Dst
+# port] and Double wide mode.
+lt FP_ING_GRP_TEMPLATE insert FP_ING_GRP_TEMPLATE_ID=1 MODE_AUTO=0 PIPE=0 \
+                              MODE=DBLINTER QUAL_INPORT_BITMAP=0xFF \
+                              QUAL_DST_IP4_BITMAP=0xFFFFFFFF \
+                              QUAL_TOS_BITMAP=0xFF QUAL_IP_PROTOCOL_BITMAP=0xFF\
+                              QUAL_L4DST_PORT_BITMAP=0xFFFF
+
+# Create IFP Rule with InPort: 0x1, Dst IPv4 Address: 192.168.01.20, DSCP: 0x18,
+# IP Protocol: 0x11 and L4Dst port: 0x22A.
+lt FP_ING_RULE_TEMPLATE insert FP_ING_RULE_TEMPLATE_ID=1 QUAL_INPORT=0x1 \
+                               QUAL_INPORT_MASK=0xFF QUAL_DST_IP4=0xC0A80114 \
+                               QUAL_DST_IP4_MASK=0xFFFFFFFF QUAL_TOS=0x18 \
+                               QUAL_TOS_MASK=0xFF QUAL_IP_PROTOCOL=0x11 \
+                               QUAL_IP_PROTOCOL_MASK=0xFF QUAL_L4DST_PORT=0x22A\
+                               QUAL_L4DST_PORT_MASK=0xFFFF
+
+# Configure COSQNew and DSCPNew actions for IFP.
+lt FP_ING_POLICY_TEMPLATE insert FP_ING_POLICY_TEMPLATE_ID=1 \
+                                 ACTION_NEW_R_DSCP=9 ACTION_NEW_Y_DSCP=9 \
+                                 ACTION_NEW_G_DSCP=9 ACTION_NEW_R_UC_COS=2 \
+                                 ACTION_NEW_Y_UC_COS=2 ACTION_NEW_G_UC_COS=2
+
+# Associate Group Id, Policy Id and Rule Id to the Entry of the Group.
+lt FP_ING_ENTRY insert FP_ING_GRP_TEMPLATE_ID=1 FP_ING_ENTRY_ID=1 \
+                       FP_ING_POLICY_TEMPLATE_ID=1 FP_ING_RULE_TEMPLATE_ID=1
+
+# Enable sFlow on port 2.
+lt MIRROR_PORT_ENCAP_SFLOW insert PORT_ID=2 \
+                                  SAMPLE_ING=1 \
+                                  SAMPLE_ING_CPU=1 \
+                                  SAMPLE_ING_RATE=0xfffffff
+
+# Send the packet with Dst IP:192.168.01.20, DSCP:0x18, IP protocol:0x11 and
+# L4Dst port:0x22A on Port 1.
+tx 1 portlist=1 \
+DATA=0000000000020000000000018100000208004518002E000000004011A4CD0A0A0A14C0A801141A80022A001AC4E4000102030405060708090A0B0C0D0E0F1011DC7EF219

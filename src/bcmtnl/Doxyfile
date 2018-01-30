@@ -1,0 +1,8 @@
+PROJECT_NAME            = "Layer-3 Tunneling Library (BCMTNL)"
+@INCLUDE                = ../doc/Doxyfile.sdk
+
+INPUT                   = DOC/bcmtnl.dox \
+                          include
+
+OUTPUT_DIRECTORY        = ../doxygen_bcmtnl
+IMAGE_PATH              = DOC/

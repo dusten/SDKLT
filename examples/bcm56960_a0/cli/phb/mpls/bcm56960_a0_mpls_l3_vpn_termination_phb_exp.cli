@@ -1,0 +1,284 @@
+#
+# Copyright: (c) 2018 Broadcom. All Rights Reserved. "Broadcom" refers to 
+# Broadcom Limited and/or its subsidiaries.
+# 
+# Broadcom Switch Software License
+# 
+# This license governs the use of the accompanying Broadcom software. Your 
+# use of the software indicates your acceptance of the terms and conditions 
+# of this license. If you do not agree to the terms and conditions of this 
+# license, do not use the software.
+# 1. Definitions
+#    "Licensor" means any person or entity that distributes its Work.
+#    "Software" means the original work of authorship made available under 
+#    this license.
+#    "Work" means the Software and any additions to or derivative works of 
+#    the Software that are made available under this license.
+#    The terms "reproduce," "reproduction," "derivative works," and 
+#    "distribution" have the meaning as provided under U.S. copyright law.
+#    Works, including the Software, are "made available" under this license 
+#    by including in or with the Work either (a) a copyright notice 
+#    referencing the applicability of this license to the Work, or (b) a copy 
+#    of this license.
+# 2. Grant of Copyright License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    copyright license to reproduce, prepare derivative works of, publicly 
+#    display, publicly perform, sublicense and distribute its Work and any 
+#    resulting derivative works in any form.
+# 3. Grant of Patent License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    patent license to make, have made, use, offer to sell, sell, import, and 
+#    otherwise transfer its Work, in whole or in part. This patent license 
+#    applies only to the patent claims licensable by Licensor that would be 
+#    infringed by Licensor's Work (or portion thereof) individually and 
+#    excluding any combinations with any other materials or technology.
+#    If you institute patent litigation against any Licensor (including a 
+#    cross-claim or counterclaim in a lawsuit) to enforce any patents that 
+#    you allege are infringed by any Work, then your patent license from such 
+#    Licensor to the Work shall terminate as of the date such litigation is 
+#    filed.
+# 4. Redistribution
+#    You may reproduce or distribute the Work only if (a) you do so under 
+#    this License, (b) you include a complete copy of this License with your 
+#    distribution, and (c) you retain without modification any copyright, 
+#    patent, trademark, or attribution notices that are present in the Work.
+# 5. Derivative Works
+#    You may specify that additional or different terms apply to the use, 
+#    reproduction, and distribution of your derivative works of the Work 
+#    ("Your Terms") only if (a) Your Terms provide that the limitations of 
+#    Section 7 apply to your derivative works, and (b) you identify the 
+#    specific derivative works that are subject to Your Terms. 
+#    Notwithstanding Your Terms, this license (including the redistribution 
+#    requirements in Section 4) will continue to apply to the Work itself.
+# 6. Trademarks
+#    This license does not grant any rights to use any Licensor's or its 
+#    affiliates' names, logos, or trademarks, except as necessary to 
+#    reproduce the notices described in this license.
+# 7. Limitations
+#    Platform. The Work and any derivative works thereof may only be used, or 
+#    intended for use, with a Broadcom switch integrated circuit.
+#    No Reverse Engineering. You will not use the Work to disassemble, 
+#    reverse engineer, decompile, or attempt to ascertain the underlying 
+#    technology of a Broadcom switch integrated circuit.
+# 8. Termination
+#    If you violate any term of this license, then your rights under this 
+#    license (including the license grants of Sections 2 and 3) will 
+#    terminate immediately.
+# 9. Disclaimer of Warranty
+#    THE WORK IS PROVIDED "AS IS" WITHOUT WARRANTIES OR CONDITIONS OF ANY 
+#    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WARRANTIES OR CONDITIONS OF 
+#    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE OR 
+#    NON-INFRINGEMENT. YOU BEAR THE RISK OF UNDERTAKING ANY ACTIVITIES UNDER 
+#    THIS LICENSE. SOME STATES' CONSUMER LAWS DO NOT ALLOW EXCLUSION OF AN 
+#    IMPLIED WARRANTY, SO THIS DISCLAIMER MAY NOT APPLY TO YOU.
+# 10. Limitation of Liability
+#    EXCEPT AS PROHIBITED BY APPLICABLE LAW, IN NO EVENT AND UNDER NO LEGAL 
+#    THEORY, WHETHER IN TORT (INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE 
+#    SHALL ANY LICENSOR BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY DIRECT, 
+#    INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF 
+#    OR RELATED TO THIS LICENSE, THE USE OR INABILITY TO USE THE WORK 
+#    (INCLUDING BUT NOT LIMITED TO LOSS OF GOODWILL, BUSINESS INTERRUPTION, 
+#    LOST PROFITS OR DATA, COMPUTER FAILURE OR MALFUNCTION, OR ANY OTHER 
+#    COMMERCIAL DAMAGES OR LOSSES), EVEN IF THE LICENSOR HAS BEEN ADVISED OF 
+#    THE POSSIBILITY OF SUCH DAMAGES.
+# 
+# 
+#
+
+################################################################################
+
+# Purpose: To demonstrate the derivation of PHB parameters from the EXP field
+# of the incoming MPLS packet.
+
+# Description: MPLS packet with tunnel label 0x65 and EXP value of 3 ingresses
+# on port 2 and derives internal priority and color of the packet. Based on
+# these PHB parameters, the packet gets queued in UC queue and gets VRF routed
+# on port 1 after MPLS tunnel termination.
+
+# Setup diagram:
+# +--------------------------------------------------------------------------+
+# |                                                                          |
+# |                +------------------+                                      |
+# |                |                  |                                      |
+# |        Port 1  |                  |Port 2                                |
+# |       <------+ |       SVK        | <-------+                            |
+# |                |                  |                                      |
+# |    IPv4 packet |                  | MPLS packet                          |
+# |    802.1p=6    +------------------+ EXP: 3  ===> PHB (INT_PRI=4, CNG=1)  |
+# |                                     UC COSQ = 2                          |
+# |                                                                          |
+# |                                                                          |
+# +--------------------------------------------------------------------------+
+
+# Ingress port(s): 2.
+
+# Egress ports(s): 1.
+
+# Egress CoS queue: 2.
+
+# Device: bcm56960_a0.
+
+# NGSDK Version: 0.8
+
+# Notes: Script is self-contained i.e. it configures all logical tables
+# required for MPLS L3 VPN termination flow and for derivation of PHB
+# paramenters from EXP field.
+
+# Verification method: Packet sampling is enabled on port 1 to capture the
+# egressing packet, that should have 802.1p priority=6 and CFI=0. The captured
+# packet is given below:
+
+# Watch information: (interface 1)
+# [RX metadata information]
+#  	HGI                             :2
+#  	PKT_LENGTH                      :64
+#  	SRC_PORT_NUM                    :1
+#  	OUTER_VID                       :2
+#  	TIMESTAMP_TYPE                  :3
+#  	SWITCH                          :1
+#  	INCOMING_TAG_STATUS             :2
+# [RX reasons]
+#  	CPU_SFLOW_SRC
+# Packet raw data (60):
+# 0000: 00 00 00 bb bb bb 00 00 - 00 00 00 02 81 00 c0 02
+# 0010: 08 00 45 00 00 26 00 00 - 00 00 3f ff f7 c0 c0 a8
+# 0020: 00 64 c0 a8 01 64 00 01 - 02 03 04 05 06 07 08 09
+# 0030: 0a 0b 0c 0d 0e 0f 10 11 - eb 18 b6 c0
+
+################################################################################
+
+# Setup packet IO from diag shell.
+pktdev init
+
+# Map all queues to channel 1.
+pktdev chan queuemap 1 highword=0xffff lowword=0xffffffff
+
+# Start packet watcher to capture packets at CPU.
+rx watcher create
+
+# Enable Link Manager (linkscan task).
+lt LM_CONTROL insert SCAN_ENABLE=1
+
+# Configure software linkscan mode for ports 1 and 2.
+for port=1,2,1 'lt LM_PORT_CONTROL insert PORT_ID=$port LINKSCAN_MODE=SOFTWARE'
+
+# Configure ports 1 and 2 in loopback mode.
+for port=1,2,1 'lt PC_PORT update PORT_ID=$port LOOPBACK_MODE=PC_LPBK_MAC'
+
+# Allow Link Manager to collect status of the ports 1 and 2.
+# Default Link Manager scan interval is 250ms.
+sleep quiet 2
+
+# Check the status of ports 1 and 2. LINK_STATE=1 indicates port is up.
+for port=1,2,1 'lt PC_PORT_STATUS lookup PORT_ID=$port'
+
+# Enable MAC counters for ports 1 and 2.
+for port=1,2,1 'lt CTR_MAC insert PORT_ID=$port'
+
+# Configure ports 1 and 2 in forwarding state.
+lt VLAN_STG insert VLAN_STG_ID=1 STATE[1-2]=FORWARD
+
+# Create L3_IIF_PROFILE 2 and enable IPv4 routing.
+lt L3_IIF_PROFILE insert L3_IIF_PROFILE_ID=2 IPV4_UC=1
+
+# Create L3_IIF index 1 and set VRF_ID=10.
+lt L3_IIF insert L3_IIF_ID=1 VRF_ID=10 L3_IIF_PROFILE_ID=2
+
+# Create VLAN 2 and include port 1.
+lt VLAN insert VLAN_ID=2 EGR_MEMBER_PORTS=2 ING_MEMBER_PORTS=2 VLAN_STG_ID=1 \
+               L3_IIF_ID=1
+
+# Create VLAN 3 and include port 2.
+lt VLAN insert VLAN_ID=3 EGR_MEMBER_PORTS=4 ING_MEMBER_PORTS=4 VLAN_STG_ID=1 \
+               L3_IIF_ID=1 MPLS=1
+
+# Configure max MTU for VLAN 2.
+lt L3_UC_MTU insert VLAN_ID=2 L3_MTU=0x3fff
+
+# Add VLAN tag for untagged packets.
+lt VLAN_ING_TAG_ACTION_PROFILE insert VLAN_ING_TAG_ACTION_PROFILE_ID=1 \
+                                      UT_OTAG=ADD
+
+# Enable MPLS on Port 2.
+lt PORT insert PORT_ID=2 V4L3=1 MPLS=1 PORT_TYPE=ETHERNET MY_MODID=0 \
+               VLAN_ING_TAG_ACTION_PROFILE_ID=1 ING_OVID=3
+
+# Configure a profile to classify 0x8100 at bytes 12,13 of the packet to be
+# outer TPID and add 0x8100 as outgoing packets outer TPID.
+lt VLAN_OUTER_TPID insert VLAN_OUTER_TPID_ID=0 ING_TPID=0x8100 EGR_TPID=0x8100
+
+# Configure to classify packets with value 0x8100 at bytes 12,13 as
+# outer VLAN tagged packet.
+for port=1,2,1 'lt PORT_POLICY insert PORT_ID=$port \
+                                      PASS_ON_OUTER_TPID_MATCH[0]=1'
+
+# Configure internal priority to map non congestion aware traffic away from
+# congestion aware queues.
+for i=0,15,1 'lt PHB_ING_ROUTED_INT_PRI_REMAP insert INT_PRI=$i NEW_INT_PRI=$i'
+
+# Configure to map the internl priority of the packet to a new internal
+# priority for the egress port.
+lt PHB_EGR_PORT_INT_PRI_REMAP insert PORT_ID=1 INT_PRI=4 NEW_INT_PRI=4
+
+# Configure to enable routing for destination MAC 00:00:00:00:00:03
+# and VLAN_ID 3.
+lt L2_MY_STATION insert VLAN_ID=3 VLAN_ID_MASK=0xfff MAC_ADDR=0x000000000003 \
+                        MAC_ADDR_MASK=0xffffffffffff MPLS_TERMINATION=1 \
+                        COPY_TO_CPU=0
+
+# Configure to map internal priority to COS queue.
+lt PORT_COS_QUEUE_MAP insert PORT_COS_QUEUE_MAP_ID=1 INT_PRI=4 UC_COS=2 MC_COS=2
+
+# Configure the ingress port to map to the port COS queue.
+lt PORT_POLICY update PORT_ID=2 PORT_COS_QUEUE_MAP_ID=1
+
+# Configure packet's MPLS EXP to map to internal priority and color.
+lt PHB_ING_MPLS_EXP_TO_INT_PRI insert PHB_ING_MPLS_EXP_TO_INT_PRI_ID=1 \
+                                      EXP=3 INT_PRI=4 CNG=1
+
+# Configure MPLS tunnel termination information and PHB parameters for
+# MPLS label=0x65.
+lt TNL_MPLS_DECAP insert MPLS_LABEL=0x65 MODID=0 MODPORT=2 \
+                         BOS_ACTIONS=L3_IIF NON_BOS_ACTIONS=POP \
+                         IPV4_PAYLOAD=1 PHB_ING_MPLS_EXP_TO_INT_PRI_ID=1 \
+                         EXP_MAP_ACTION=MAP_PRI_CNG TNL_EXP_TO_INNER_EXP=1
+
+# Configure MPLS tunnel termination information and PHB parameters for
+# MPLS label=0xC9.
+lt TNL_MPLS_DECAP insert MPLS_LABEL=0xC9 MODID=0 MODPORT=2 L3_IIF_ID=1 \
+                         BOS_ACTIONS=L3_IIF NON_BOS_ACTIONS=POP \
+                         IPV4_PAYLOAD=1 PHB_ING_MPLS_EXP_TO_INT_PRI_ID=1 \
+                         EXP_MAP_ACTION=MAP_PRI_CNG TNL_EXP_TO_INNER_EXP=1
+
+# Configure PHB parameters to map to egress 802.1p priority and CFI.
+lt PHB_EGR_PORT_INT_PRI_TO_L2_OTAG insert PORT_ID=1 INT_PRI=4 CNG=1 PRI=6 CFI=0
+
+# Configure egress port to use packet's internal priority and color to index
+# the PHB_EGR_PORT_INT_PRI_TO_L2_OTAG table.
+lt PORT_PHB insert PORT_ID=1 TRUST_PHB_EGR_PORT_L2_OTAG=1
+
+# Create egress L3 interface (L3_EIF).
+lt L3_EIF insert L3_EIF_ID=1 VLAN_ID=2 MAC_SA=0x000000000002
+
+# Create L3 next-hop.
+lt L3_UC_NHOP insert NHOP_ID=2 MODPORT=1 MODID=0 VLAN_ID=2 L3_EIF_ID=1 \
+                     MAC_DA=0x000000BBBBBB COPY_TO_CPU=0
+
+# Create default route.
+lt L3_IPV4_UC_ROUTE_VRF insert VRF_ID=10 IPV4=0x0 IPV4_MASK=0x0 NHOP_ID=2
+
+# Create IPv4 route.
+lt L3_IPV4_UC_ROUTE_VRF insert VRF_ID=10 IPV4=0xC0A80164 IPV4_MASK=0xFFFFFF00 \
+                               NHOP_ID=2
+
+# Enable sFlow on port 1.
+lt MIRROR_PORT_ENCAP_SFLOW insert PORT_ID=1 \
+                                  SAMPLE_ING=1 \
+                                  SAMPLE_ING_CPU=1 \
+                                  SAMPLE_ING_RATE=0xfffffff
+
+tx 1 portlist=2 DATA=00000000000300000000AAAA81000003884700065640000C9540450000260000000040FFF6C0C0A80064C0A80164000102030405060708090A0B0C0D0E0F1011EB18B6C0
+
+echo "Done"

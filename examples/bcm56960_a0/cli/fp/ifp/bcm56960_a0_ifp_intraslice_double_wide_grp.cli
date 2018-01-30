@@ -1,0 +1,292 @@
+#
+# Copyright: (c) 2018 Broadcom. All Rights Reserved. "Broadcom" refers to 
+# Broadcom Limited and/or its subsidiaries.
+# 
+# Broadcom Switch Software License
+# 
+# This license governs the use of the accompanying Broadcom software. Your 
+# use of the software indicates your acceptance of the terms and conditions 
+# of this license. If you do not agree to the terms and conditions of this 
+# license, do not use the software.
+# 1. Definitions
+#    "Licensor" means any person or entity that distributes its Work.
+#    "Software" means the original work of authorship made available under 
+#    this license.
+#    "Work" means the Software and any additions to or derivative works of 
+#    the Software that are made available under this license.
+#    The terms "reproduce," "reproduction," "derivative works," and 
+#    "distribution" have the meaning as provided under U.S. copyright law.
+#    Works, including the Software, are "made available" under this license 
+#    by including in or with the Work either (a) a copyright notice 
+#    referencing the applicability of this license to the Work, or (b) a copy 
+#    of this license.
+# 2. Grant of Copyright License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    copyright license to reproduce, prepare derivative works of, publicly 
+#    display, publicly perform, sublicense and distribute its Work and any 
+#    resulting derivative works in any form.
+# 3. Grant of Patent License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    patent license to make, have made, use, offer to sell, sell, import, and 
+#    otherwise transfer its Work, in whole or in part. This patent license 
+#    applies only to the patent claims licensable by Licensor that would be 
+#    infringed by Licensor's Work (or portion thereof) individually and 
+#    excluding any combinations with any other materials or technology.
+#    If you institute patent litigation against any Licensor (including a 
+#    cross-claim or counterclaim in a lawsuit) to enforce any patents that 
+#    you allege are infringed by any Work, then your patent license from such 
+#    Licensor to the Work shall terminate as of the date such litigation is 
+#    filed.
+# 4. Redistribution
+#    You may reproduce or distribute the Work only if (a) you do so under 
+#    this License, (b) you include a complete copy of this License with your 
+#    distribution, and (c) you retain without modification any copyright, 
+#    patent, trademark, or attribution notices that are present in the Work.
+# 5. Derivative Works
+#    You may specify that additional or different terms apply to the use, 
+#    reproduction, and distribution of your derivative works of the Work 
+#    ("Your Terms") only if (a) Your Terms provide that the limitations of 
+#    Section 7 apply to your derivative works, and (b) you identify the 
+#    specific derivative works that are subject to Your Terms. 
+#    Notwithstanding Your Terms, this license (including the redistribution 
+#    requirements in Section 4) will continue to apply to the Work itself.
+# 6. Trademarks
+#    This license does not grant any rights to use any Licensor's or its 
+#    affiliates' names, logos, or trademarks, except as necessary to 
+#    reproduce the notices described in this license.
+# 7. Limitations
+#    Platform. The Work and any derivative works thereof may only be used, or 
+#    intended for use, with a Broadcom switch integrated circuit.
+#    No Reverse Engineering. You will not use the Work to disassemble, 
+#    reverse engineer, decompile, or attempt to ascertain the underlying 
+#    technology of a Broadcom switch integrated circuit.
+# 8. Termination
+#    If you violate any term of this license, then your rights under this 
+#    license (including the license grants of Sections 2 and 3) will 
+#    terminate immediately.
+# 9. Disclaimer of Warranty
+#    THE WORK IS PROVIDED "AS IS" WITHOUT WARRANTIES OR CONDITIONS OF ANY 
+#    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WARRANTIES OR CONDITIONS OF 
+#    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE OR 
+#    NON-INFRINGEMENT. YOU BEAR THE RISK OF UNDERTAKING ANY ACTIVITIES UNDER 
+#    THIS LICENSE. SOME STATES' CONSUMER LAWS DO NOT ALLOW EXCLUSION OF AN 
+#    IMPLIED WARRANTY, SO THIS DISCLAIMER MAY NOT APPLY TO YOU.
+# 10. Limitation of Liability
+#    EXCEPT AS PROHIBITED BY APPLICABLE LAW, IN NO EVENT AND UNDER NO LEGAL 
+#    THEORY, WHETHER IN TORT (INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE 
+#    SHALL ANY LICENSOR BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY DIRECT, 
+#    INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF 
+#    OR RELATED TO THIS LICENSE, THE USE OR INABILITY TO USE THE WORK 
+#    (INCLUDING BUT NOT LIMITED TO LOSS OF GOODWILL, BUSINESS INTERRUPTION, 
+#    LOST PROFITS OR DATA, COMPUTER FAILURE OR MALFUNCTION, OR ANY OTHER 
+#    COMMERCIAL DAMAGES OR LOSSES), EVEN IF THE LICENSOR HAS BEEN ADVISED OF 
+#    THE POSSIBILITY OF SUCH DAMAGES.
+# 
+# 
+#
+
+################################################################################
+#
+# Purpose: CLI example to show configuration of IFP[Ingress Field Processor] in
+# Global mode with Intraslice double wide group.
+#
+# Description: Presel 1 - Qualifiers [L3_TYPE: ANY_IP4
+#                                     PKT_RESOLUTION: UNKNOWN_L3UC_PKT]
+#              Group 1  - Qualifiers [PRESEL_ENTRY: 0x1, DST_MAC, OUTER_VLAN_ID,
+#                                     OUTER_VLAN_PRI, OUTER_VLAN_CFI, DST_IP4]
+#                         and Mode [Intraslice double]
+#              Rule 1   - Destination MAC address: 00:00:00:00:00:02
+#                         Outer VLAN ID: 0x2
+#                         Destination IPv4 address: 192.168.01.20
+#              Policy 1 - Switch to L3Unicast NHOP
+#              Entry 1  - Associate Rule 1, Policy 1 with Entry 1 in Group 1
+#
+# Notes: This script shows routing a packet using IFP.
+#
+# The initial steps of setting up packet IO, mapping queues to channel, starting
+# packet watcher, configuring port in loopback, checking link status of ports,
+# configuring VLAN STG, MAC counters, creating VLAN, adding my station tcam
+# entry, creating L3 interface and nexthop objects are for validating the
+# functionality of the script.
+# Port 1 is used for illustration purposes. The next six steps configure FP
+# with the above description set. A packet is sent from port 1 to match the
+# configuration and it gets forwarded with the configured L3 Unicast NHOP.
+#
+# Setup diagram:
+#                +------------------------------------------------+
+#                |                                                |
+#                |                 BCM56960                       |
+#                |                                                |
+#                |  Presel                                        |
+#                |  Qualifiers: L3 type - Any IPv4                |
+#                |              Packet resolution - Unknown L3 UC |
+#                |                                                |
+#+-------------> |  IFP                                           +------------>
+#     Port 1     |  Qualifiers: Presel - 0x1                      | Port 2
+#                |              Dest MAC - 0x2                    |
+#                |              Outer VLAN Id - 0x2               |
+#                |              Dest IPv4 - 0xC0A80114            |
+#                |                                                |
+#                |  Action: Switch to L3 UC NHOP - 2              |
+#                |                                                |
+#                +------------------------------------------------+
+#
+# Ingress port(s): 1.
+#
+# Egress port(s): 2.
+#
+# Egress CoS queue: Not relevant.
+#
+# Device: bcm56960_a0
+#
+# NGSDK Version: 0.9
+#
+# Verification method: Packet sampling is enabled on port 2 to show the packet
+# that gets forwarded and check if it is as below.
+#
+# Watch information: (interface 1)
+# [RX metadata information]
+# 	      HGI                             :2
+# 	      PKT_LENGTH                      :72
+# 	      SRC_PORT_NUM                    :2
+# 	      OUTER_VID                       :3
+# 	      TIMESTAMP_TYPE                  :3
+# 	      SWITCH                          :1
+# 	      INCOMING_TAG_STATUS             :1
+# [RX reasons]
+# 	      CPU_SFLOW_SRC
+# Packet raw data (68):
+# 0000: 00 00 00 00 00 0b 00 00 - 00 aa aa aa 81 00 00 03
+# 0010: 08 00 45 00 00 2e 00 00 - 00 00 3f ff a4 f7 0a 0a
+# 0020: 0a 14 c0 a8 01 14 00 01 - 02 03 04 05 06 07 08 09
+# 0030: 0a 0b 0c 0d 0e 0f 10 11 - 12 13 14 15 16 17 18 19
+# 0040: 36 40 45 4e
+#
+################################################################################
+
+# Setup packet IO from diag shell.
+pktdev init
+
+# Map all queues to channel 1.
+pktdev chan queuemap 1 highword=0xffff lowword=0xffffffff
+
+# Start packet watcher.
+rx watcher create
+
+# Enable Link Manager(linkscan task).
+lt LM_CONTROL insert SCAN_ENABLE=1
+
+# Configure software linkscan mode for ports 1-2.
+for port=1,2 'lt LM_PORT_CONTROL insert PORT_ID=$port LINKSCAN_MODE=SOFTWARE'
+
+# Configure ports 1-2 and put them in loopback mode.
+for port=1,2 'lt PC_PORT update PORT_ID=$port LOOPBACK_MODE=PC_LPBK_MAC'
+
+# Allow Link Manager to collect status of the ports 1-2.
+# Default Link Manager scan interval is 250 ms.
+sleep quiet 3
+
+# Check status of the ports 1-2. LINK_STATE=1 indicates port is UP.
+for port=1,2 'lt LM_LINK_STATE lookup PORT_ID=$port'
+
+# Put ports 1-2 in forwarding state.
+lt VLAN_STG insert VLAN_STG_ID=1 STATE[1-2]=FORWARD
+
+# Add VLAN tag for untagged packets.
+lt VLAN_ING_TAG_ACTION_PROFILE insert VLAN_ING_TAG_ACTION_PROFILE_ID=1 \
+                                      UT_OTAG=ADD
+
+# Enable MAC counters for ports 1-2.
+for port=1,2 'lt CTR_MAC insert PORT_ID=$port'
+
+# Create VLAN 2 and include port 1.
+lt VLAN insert VLAN_ID=2 EGR_MEMBER_PORTS=2 ING_MEMBER_PORTS=2 VLAN_STG_ID=1 \
+               L3_IIF_ID=2
+
+# Create VLAN 3 and include port 2.
+lt VLAN insert VLAN_ID=3 EGR_MEMBER_PORTS=4 ING_MEMBER_PORTS=4  VLAN_STG_ID=1 \
+               L3_IIF_ID=2
+
+# Configure MTU to be max for vlans 2-3.
+for vlan=2,3 'lt L3_UC_MTU insert VLAN_ID=$vlan L3_MTU=0x3fff'
+
+# Enable IPv4 routing on Port 1.
+lt PORT insert PORT_ID=1 V4L3=1 PORT_TYPE=ETHERNET MY_MODID=0 ING_OVID=2 \
+               VLAN_ING_TAG_ACTION_PROFILE_ID=1
+
+# Configure a profile to classify 0x8100 at bytes 12,13 of the packet to be
+# outer TPID and add 0x8100 as outgoing packet's outer TPID.
+lt VLAN_OUTER_TPID insert VLAN_OUTER_TPID_ID=0 ING_TPID=0x8100 EGR_TPID=0x8100
+
+# Classify packets with value 0x8100 at bytes 12,13 as outer VLAN tagged packet.
+for port=1,2 'lt PORT_POLICY insert PORT_ID=$port PASS_ON_OUTER_TPID_MATCH[0]=1'
+
+# Create L3_IIF_PROFILE 1 and enable IPv4 routing.
+lt L3_IIF_PROFILE insert L3_IIF_PROFILE_ID=1 IPV4_UC=1
+
+# Create L3_IIF index 2 and set VRF_ID=0.
+lt L3_IIF insert L3_IIF_ID=2 VRF_ID=0 L3_IIF_PROFILE_ID=1
+
+# Enable routing for mac:02+vlan_id:2.
+lt L2_MY_STATION insert VLAN_ID=2 VLAN_ID_MASK=0xfff MAC_ADDR=0x2 \
+                        MAC_ADDR_MASK=0xffffffffffff IPV4_TERMINATION=1
+
+# Create L3 interface.
+lt L3_EIF insert L3_EIF_ID=2 VLAN_ID=3 MAC_SA=0x000000AAAAAA
+
+# Create L3 nexthop.
+lt L3_UC_NHOP insert NHOP_ID=2 MODPORT=2 MODID=0 VLAN_ID=2 L3_EIF_ID=2 \
+                     MAC_DA=0x00000000000B
+
+# FP configuration starts with the below steps.
+# ---------------------------------------------
+
+# Enable IFP on port 1.
+lt PORT_FP insert PORT_ID=1 FP_ING=1
+
+# Create a presel entry with IP type and packet result qualifiers.
+lt FP_ING_PRESEL_ENTRY_TEMPLATE insert FP_ING_PRESEL_ENTRY_TEMPLATE_ID=0x1 \
+                                       QUAL_L3_TYPE=ANY_IP4 \
+                                       QUAL_PKT_RESOLUTION=UNKNOWN_L3UC_PKT
+
+# Create IFP group 1 with qset [dst MAC, outer VLAN and dst IP] and intraslice
+# double wide mode.
+lt FP_ING_GRP_TEMPLATE insert FP_ING_GRP_TEMPLATE_ID=1 MODE_AUTO=0 \
+                              MODE=DBLINTRA ENTRY_PRIORITY=0x1 \
+                              FP_ING_PRESEL_ENTRY_TEMPLATE_ID[0]=1 \
+                              QUAL_DST_MAC_BITMAP=0xFFFFFFFFFFFF \
+                              QUAL_OUTER_VLAN_ID_BITMAP=0xFFF \
+                              QUAL_OUTER_VLAN_PRI_BITMAP=0x7 \
+                              QUAL_OUTER_VLAN_CFI_BITMAP=0x1 \
+                              QUAL_DST_IP4_BITMAP=0xFFFFFFFF
+
+# Create IFP Rule with outer VLAN id:0x2, dst MAC: 00:00:00:00:00:02 and dst
+# IPv4 Address: 192.168.01.20.
+lt FP_ING_RULE_TEMPLATE insert FP_ING_RULE_TEMPLATE_ID=1 \
+                               QUAL_OUTER_VLAN_ID=0x2 \
+                               QUAL_OUTER_VLAN_ID_MASK=0xFFF QUAL_DST_MAC=0x2 \
+                               QUAL_DST_MAC_MASK=0xFFFFFFFFFFFF \
+                               QUAL_DST_IP4=0xC0A80114 \
+                               QUAL_DST_IP4_MASK=0xFFFFFFFF
+
+# Configure switch to L3 unicast action for IFP.
+lt FP_ING_POLICY_TEMPLATE insert FP_ING_POLICY_TEMPLATE_ID=1 \
+                                 ACTION_SWITCH_TO_L3UC=2
+
+# Associate group Id, policy Id and rule id to the entry of the group.
+lt FP_ING_ENTRY insert FP_ING_GRP_TEMPLATE_ID=1 FP_ING_ENTRY_ID=1 \
+                       FP_ING_POLICY_TEMPLATE_ID=1 FP_ING_RULE_TEMPLATE_ID=1
+
+# Enable sFlow on port 2.
+lt MIRROR_PORT_ENCAP_SFLOW insert PORT_ID=2 \
+                                  SAMPLE_ING=1 \
+                                  SAMPLE_ING_CPU=1 \
+                                  SAMPLE_ING_RATE=0xfffffff
+
+# Send the packet with dst MAC:00:00:00:00:00:02, VLAN id:0x2 and dst IPv4
+# address:192.168.01.20 on port 1.
+tx 1 portlist=1 \
+DATA=0000000000020000000000018100000208004518002E0000000040FFA3DF0A0A0A14C0A80114000102030405060708090A0B0C0D0E0F101112131415161718193640454E
+

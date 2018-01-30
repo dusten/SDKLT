@@ -1,0 +1,9 @@
+PROJECT_NAME            = "Layer-2 Library (BCML2)"
+@INCLUDE                = ../doc/Doxyfile.sdk
+
+INCLUDE_PATH            = include
+
+INPUT                   = DOC/bcml2.dox \
+                          include
+
+OUTPUT_DIRECTORY        = ../doxygen_bcml2

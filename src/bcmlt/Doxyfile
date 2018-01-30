@@ -1,0 +1,8 @@
+PROJECT_NAME            = "Logical Table Library (BCMLT)"
+@INCLUDE                = ../doc/Doxyfile.sdk
+
+INPUT                   = DOC/bcmlt.dox \
+                          include 
+
+OUTPUT_DIRECTORY        = ../doxygen_bcmlt
+

@@ -1,0 +1,18 @@
+PROJECT_NAME            = "Application Library"
+@INCLUDE                = ../doc/Doxyfile.sdk
+
+INPUT                   = DOC/bcma.dox \
+                          DOC/bcma_cli.dox \
+                          DOC/bcma_bcmlt.dox \
+                          DOC/bcma_bcmbd.dox \
+                          DOC/bcma_test.dox \
+                          include/bcma
+
+EXCLUDE                 = include/bcma/editline \
+                          include/bcma/bsl \
+                          include/bcma/bslcmd \
+                          include/bcma/ha \
+                          include/bcma/cfgdb
+
+OUTPUT_DIRECTORY        = ../../doxygen_bcma
+

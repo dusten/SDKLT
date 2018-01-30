@@ -1,0 +1,22 @@
+/*! \mainpage User Guide
+
+\tableofcontents
+
+\section intro Overview
+
+The SDK BCMLT library contains API to access the Device Logical Tables and
+Physical Tables.
+
+\section bcmlt_build Build
+
+The makefile for the BCMLT library is built upon the make include
+files in the <tt>$SDK/make</tt> directory.
+
+\section BCMLT Logical Table API
+
+Defines a generic interface to access Broadcom Logical Tables and Physical
+Tables for Switch on Chip Devices.
+
+For a complete description, please refer to \ref bcmlt.h.
+
+*/

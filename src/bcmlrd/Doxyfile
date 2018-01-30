@@ -1,0 +1,7 @@
+PROJECT_NAME            = "Logical Resource Database Library (BCMLRD)"
+@INCLUDE                = ../doc/Doxyfile.sdk
+
+INPUT                   = DOC/bcmlrd.dox \
+                          include/bcmlrd
+
+OUTPUT_DIRECTORY        = ../doxygen/bcmlrd

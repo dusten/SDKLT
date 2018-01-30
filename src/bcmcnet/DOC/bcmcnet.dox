@@ -1,0 +1,14 @@
+/*! \mainpage User Guide
+
+\tableofcontents
+
+\section intro Overview
+
+The SDK Core Network Driver (CNET) library contains Packet DMA driver
+functions and APIs for accessing device and transmitting packets.
+
+The makefile for the CNET library is built upon the make include files
+in the <tt>$SDK/make</tt> directory.
+
+*/
+

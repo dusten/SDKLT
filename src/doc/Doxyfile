@@ -1,0 +1,6 @@
+PROJECT_NAME            = "API Reference"
+@INCLUDE                = ../doc/Doxyfile.sdk
+
+INPUT                   = DOC/sdk.dox
+
+OUTPUT_DIRECTORY        = ../doxygen_sdk

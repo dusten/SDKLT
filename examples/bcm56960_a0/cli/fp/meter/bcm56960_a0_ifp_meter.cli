@@ -1,0 +1,230 @@
+#
+# Copyright: (c) 2018 Broadcom. All Rights Reserved. "Broadcom" refers to 
+# Broadcom Limited and/or its subsidiaries.
+# 
+# Broadcom Switch Software License
+# 
+# This license governs the use of the accompanying Broadcom software. Your 
+# use of the software indicates your acceptance of the terms and conditions 
+# of this license. If you do not agree to the terms and conditions of this 
+# license, do not use the software.
+# 1. Definitions
+#    "Licensor" means any person or entity that distributes its Work.
+#    "Software" means the original work of authorship made available under 
+#    this license.
+#    "Work" means the Software and any additions to or derivative works of 
+#    the Software that are made available under this license.
+#    The terms "reproduce," "reproduction," "derivative works," and 
+#    "distribution" have the meaning as provided under U.S. copyright law.
+#    Works, including the Software, are "made available" under this license 
+#    by including in or with the Work either (a) a copyright notice 
+#    referencing the applicability of this license to the Work, or (b) a copy 
+#    of this license.
+# 2. Grant of Copyright License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    copyright license to reproduce, prepare derivative works of, publicly 
+#    display, publicly perform, sublicense and distribute its Work and any 
+#    resulting derivative works in any form.
+# 3. Grant of Patent License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    patent license to make, have made, use, offer to sell, sell, import, and 
+#    otherwise transfer its Work, in whole or in part. This patent license 
+#    applies only to the patent claims licensable by Licensor that would be 
+#    infringed by Licensor's Work (or portion thereof) individually and 
+#    excluding any combinations with any other materials or technology.
+#    If you institute patent litigation against any Licensor (including a 
+#    cross-claim or counterclaim in a lawsuit) to enforce any patents that 
+#    you allege are infringed by any Work, then your patent license from such 
+#    Licensor to the Work shall terminate as of the date such litigation is 
+#    filed.
+# 4. Redistribution
+#    You may reproduce or distribute the Work only if (a) you do so under 
+#    this License, (b) you include a complete copy of this License with your 
+#    distribution, and (c) you retain without modification any copyright, 
+#    patent, trademark, or attribution notices that are present in the Work.
+# 5. Derivative Works
+#    You may specify that additional or different terms apply to the use, 
+#    reproduction, and distribution of your derivative works of the Work 
+#    ("Your Terms") only if (a) Your Terms provide that the limitations of 
+#    Section 7 apply to your derivative works, and (b) you identify the 
+#    specific derivative works that are subject to Your Terms. 
+#    Notwithstanding Your Terms, this license (including the redistribution 
+#    requirements in Section 4) will continue to apply to the Work itself.
+# 6. Trademarks
+#    This license does not grant any rights to use any Licensor's or its 
+#    affiliates' names, logos, or trademarks, except as necessary to 
+#    reproduce the notices described in this license.
+# 7. Limitations
+#    Platform. The Work and any derivative works thereof may only be used, or 
+#    intended for use, with a Broadcom switch integrated circuit.
+#    No Reverse Engineering. You will not use the Work to disassemble, 
+#    reverse engineer, decompile, or attempt to ascertain the underlying 
+#    technology of a Broadcom switch integrated circuit.
+# 8. Termination
+#    If you violate any term of this license, then your rights under this 
+#    license (including the license grants of Sections 2 and 3) will 
+#    terminate immediately.
+# 9. Disclaimer of Warranty
+#    THE WORK IS PROVIDED "AS IS" WITHOUT WARRANTIES OR CONDITIONS OF ANY 
+#    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WARRANTIES OR CONDITIONS OF 
+#    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE OR 
+#    NON-INFRINGEMENT. YOU BEAR THE RISK OF UNDERTAKING ANY ACTIVITIES UNDER 
+#    THIS LICENSE. SOME STATES' CONSUMER LAWS DO NOT ALLOW EXCLUSION OF AN 
+#    IMPLIED WARRANTY, SO THIS DISCLAIMER MAY NOT APPLY TO YOU.
+# 10. Limitation of Liability
+#    EXCEPT AS PROHIBITED BY APPLICABLE LAW, IN NO EVENT AND UNDER NO LEGAL 
+#    THEORY, WHETHER IN TORT (INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE 
+#    SHALL ANY LICENSOR BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY DIRECT, 
+#    INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF 
+#    OR RELATED TO THIS LICENSE, THE USE OR INABILITY TO USE THE WORK 
+#    (INCLUDING BUT NOT LIMITED TO LOSS OF GOODWILL, BUSINESS INTERRUPTION, 
+#    LOST PROFITS OR DATA, COMPUTER FAILURE OR MALFUNCTION, OR ANY OTHER 
+#    COMMERCIAL DAMAGES OR LOSSES), EVEN IF THE LICENSOR HAS BEEN ADVISED OF 
+#    THE POSSIBILITY OF SUCH DAMAGES.
+# 
+# 
+#
+
+################################################################################
+#
+# Purpose: CLI example to show configuration of IFP meters.
+#
+# Description: Meter 1  - Flow mode, CIR :1000000 kbps and CBS : 80kbps
+#              Group 1  - Qualifiers [InPort] and auto mode
+#              Rule 1   - Inport: 0x4
+#              Policy 1 - R_DROP
+#              Entry 1  - Associate Rule 1, Policy 1 and Meter 1 with Entry 1 in
+#                         Group 1
+#
+# Notes: Logical table "METER_FP_ING_CONFIG" is used to enable meter "REFRESH".
+#        The field of this logical table can be set to TRUE/FALSE only during
+#        system initialization and is not allowed to modify runtime.
+#
+# The initial steps of setting up packet IO, mapping queues to channel, checking
+# link status of ports, configuring VLAN STG, MAC counters and creating VLAN are
+# for validating the functionality of this script.
+# The next six steps configure IFP and meter with the above description set.
+# Packets are sent at a rate higher than 1Gbps and burst size of 80 kbps from
+# port 4 using Ixia [packet generator] to check the metering. It was seen that
+# the packets got forwarded through port 3 at the rate of 1Gbps.
+#
+# Setup diagram:
+#                +----------------------------------+
+#                |                                  |
+#                |            BCM56960              |
+#                |                                  |
+#                |  IFP                             |
+#                |  Qualifiers: Inport - 0x4        |
+#+-------------> |                                  +------------------>
+#      Port 4    |  Actions: Drop red packets       |  Port 3
+#                |           Meter - Flow mode      |
+#                |                     CIR: 1  Gbps |
+#                |                     CBS: 80 Kbps |
+#                |                                  |
+#                +----------------------------------+
+#
+# Ingress port(s): 4.
+#
+# Egress port(s): 3.
+#
+# Egress CoS queue: Not relevant.
+#
+# Device: bcm56960_a0
+#
+# NGSDK Version: 0.9
+#
+# Verification method: We can check the configured meter parameters through the
+# below command.
+#
+# BCMLT.0>  dsh -c "get nz IFP_METER_TABLEm"
+# memory  IFP_METER_TABLEm{0}[0].ipipe0 [0x000148440000] = 0x00140000 0x07a12005 0x00000000
+#	      BUCKETCOUNT=0x140000(1310720)
+#	      BUCKETSIZE=0x14(20)
+#	      REFRESHCOUNT=0x1e848(125000)
+# memory  IFP_METER_TABLEm{1}[0].ipipe0 [0x010148440000] = 0x00140000 0x07a12005 0x00000000
+#         BUCKETCOUNT=0x140000(1310720)
+#         BUCKETSIZE=0x14(20)
+#         REFRESHCOUNT=0x1e848(125000)
+# memory  IFP_METER_TABLEm{2}[0].ipipe0 [0x020148440000] = 0x00140000 0x07a12005 0x00000000
+#	      BUCKETCOUNT=0x140000(1310720)
+#	      BUCKETSIZE=0x14(20)
+#	      REFRESHCOUNT=0x1e848(125000)
+# memory  IFP_METER_TABLEm{3}[0].ipipe0 [0x030148440000] = 0x00140000 0x07a12005 0x00000000
+#	      BUCKETCOUNT=0x140000(1310720)
+#	      BUCKETSIZE=0x14(20)
+#	      REFRESHCOUNT=0x1e848(125000)
+#
+################################################################################
+
+# Setup packet IO from diag shell.
+pktdev init
+
+# Map all queues to channel 1.
+pktdev chan queuemap 1 highword=0xffff lowword=0xffffffff
+
+# Enable Link Manager(linkscan task).
+lt LM_CONTROL insert SCAN_ENABLE=1
+
+# Configure software linkscan mode for ports 3,4.
+for port=3,4 'lt LM_PORT_CONTROL insert PORT_ID=$port LINKSCAN_MODE=SOFTWARE'
+
+# Allow Link Manager to collect status of the ports 3,4.
+# Default Link Manager scan interval is 250 ms.
+sleep quiet 3
+
+# Check status of the ports 3,4. LINK_STATE=1 indicates port is UP.
+for port=3,4 'lt LM_LINK_STATE lookup PORT_ID=$port'
+
+# Put ports 3,4 in forwarding state.
+lt VLAN_STG insert VLAN_STG_ID=1 STATE[3-4]=FORWARD
+
+# Enable MAC counters for ports 3,4.
+for port=3,4 'lt CTR_MAC insert PORT_ID=$port'
+
+# Configure a profile to classify 0x8100 at bytes 12,13 of the packet to be
+# outer TPID and add 0x8100 as outgoing packet's outer TPID.
+lt VLAN_OUTER_TPID insert VLAN_OUTER_TPID_ID=0 ING_TPID=0x8100
+
+# Classify packets with value 0x8100 at bytes 12,13 as outer VLAN tagged packet.
+for port=3,4 'lt PORT_POLICY insert PORT_ID=$port PASS_ON_OUTER_TPID_MATCH[0]=1'
+
+# Add an L2 entry to switch packets to port 3 with MAC address:0x2 and VLAN:0x1.
+lt L2_FDB_VLAN insert VLAN_ID=0x1 MAC_ADDR=0x2 DEST_TYPE=PORT MODID=0 MODPORT=3
+
+# Metering through IFP configuration starts with the below steps.
+#----------------------------------------------------------------
+
+# Enable IFP on port 4.
+lt PORT_FP insert PORT_ID=4 FP_ING=1
+
+# Configuration meter in color blind flow mode with CIR:1 GBPS and CBS:80 KBPS.
+lt METER_FP_ING_TEMPLATE insert METER_FP_ING_TEMPLATE_ID=1 PKT_MODE=0 \
+                                METER_FP_ING_POOL_ID=0 METER_MODE=FLOW \
+                                COLOR_MODE=0 MIN_RATE_KBPS=1000000 \
+                                MIN_BURST_SIZE_KBITS=80
+
+# Create IFP group 1 with Qset [inport] and auto mode.
+lt FP_ING_GRP_TEMPLATE insert FP_ING_GRP_TEMPLATE_ID=1 MODE_AUTO=1 \
+                              QUAL_INPORT_BITMAP=0xFF
+
+# Create IFP rule with inport: 0x4.
+lt FP_ING_RULE_TEMPLATE insert QUAL_INPORT=0x4 QUAL_INPORT_MASK=0xFF \
+                               FP_ING_RULE_TEMPLATE_ID=1
+
+# Configure R_DROP action for IFP metering to drop red packets.
+lt FP_ING_POLICY_TEMPLATE insert FP_ING_POLICY_TEMPLATE_ID=1 \
+                                 ACTION_R_DROP=1
+
+# Associate group id, policy id, rule id and meter id to the entry of the group.
+lt FP_ING_ENTRY insert FP_ING_GRP_TEMPLATE_ID=1 METER_FP_ING_TEMPLATE_ID=1 \
+                       FP_ING_POLICY_TEMPLATE_ID=1 FP_ING_RULE_TEMPLATE_ID=1 \
+                       FP_ING_ENTRY_ID=1
+
+# To check IFP_METER_TABLE.
+dsh -c "get nz IFP_METER_TABLEm"
+
+# Send the packets with destination MAC:0x2 and VLAN ID:0x1 on port 4 at rate
+# higher than 1 Gbps and burst rate of 80 Kbps and see that the packets egresses
+# through port 3 at the rate of 1 Gbps.

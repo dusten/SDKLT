@@ -1,0 +1,1775 @@
+#
+# Copyright: (c) 2018 Broadcom. All Rights Reserved. "Broadcom" refers to 
+# Broadcom Limited and/or its subsidiaries.
+# 
+# Broadcom Switch Software License
+# 
+# This license governs the use of the accompanying Broadcom software. Your 
+# use of the software indicates your acceptance of the terms and conditions 
+# of this license. If you do not agree to the terms and conditions of this 
+# license, do not use the software.
+# 1. Definitions
+#    "Licensor" means any person or entity that distributes its Work.
+#    "Software" means the original work of authorship made available under 
+#    this license.
+#    "Work" means the Software and any additions to or derivative works of 
+#    the Software that are made available under this license.
+#    The terms "reproduce," "reproduction," "derivative works," and 
+#    "distribution" have the meaning as provided under U.S. copyright law.
+#    Works, including the Software, are "made available" under this license 
+#    by including in or with the Work either (a) a copyright notice 
+#    referencing the applicability of this license to the Work, or (b) a copy 
+#    of this license.
+# 2. Grant of Copyright License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    copyright license to reproduce, prepare derivative works of, publicly 
+#    display, publicly perform, sublicense and distribute its Work and any 
+#    resulting derivative works in any form.
+# 3. Grant of Patent License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    patent license to make, have made, use, offer to sell, sell, import, and 
+#    otherwise transfer its Work, in whole or in part. This patent license 
+#    applies only to the patent claims licensable by Licensor that would be 
+#    infringed by Licensor's Work (or portion thereof) individually and 
+#    excluding any combinations with any other materials or technology.
+#    If you institute patent litigation against any Licensor (including a 
+#    cross-claim or counterclaim in a lawsuit) to enforce any patents that 
+#    you allege are infringed by any Work, then your patent license from such 
+#    Licensor to the Work shall terminate as of the date such litigation is 
+#    filed.
+# 4. Redistribution
+#    You may reproduce or distribute the Work only if (a) you do so under 
+#    this License, (b) you include a complete copy of this License with your 
+#    distribution, and (c) you retain without modification any copyright, 
+#    patent, trademark, or attribution notices that are present in the Work.
+# 5. Derivative Works
+#    You may specify that additional or different terms apply to the use, 
+#    reproduction, and distribution of your derivative works of the Work 
+#    ("Your Terms") only if (a) Your Terms provide that the limitations of 
+#    Section 7 apply to your derivative works, and (b) you identify the 
+#    specific derivative works that are subject to Your Terms. 
+#    Notwithstanding Your Terms, this license (including the redistribution 
+#    requirements in Section 4) will continue to apply to the Work itself.
+# 6. Trademarks
+#    This license does not grant any rights to use any Licensor's or its 
+#    affiliates' names, logos, or trademarks, except as necessary to 
+#    reproduce the notices described in this license.
+# 7. Limitations
+#    Platform. The Work and any derivative works thereof may only be used, or 
+#    intended for use, with a Broadcom switch integrated circuit.
+#    No Reverse Engineering. You will not use the Work to disassemble, 
+#    reverse engineer, decompile, or attempt to ascertain the underlying 
+#    technology of a Broadcom switch integrated circuit.
+# 8. Termination
+#    If you violate any term of this license, then your rights under this 
+#    license (including the license grants of Sections 2 and 3) will 
+#    terminate immediately.
+# 9. Disclaimer of Warranty
+#    THE WORK IS PROVIDED "AS IS" WITHOUT WARRANTIES OR CONDITIONS OF ANY 
+#    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WARRANTIES OR CONDITIONS OF 
+#    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE OR 
+#    NON-INFRINGEMENT. YOU BEAR THE RISK OF UNDERTAKING ANY ACTIVITIES UNDER 
+#    THIS LICENSE. SOME STATES' CONSUMER LAWS DO NOT ALLOW EXCLUSION OF AN 
+#    IMPLIED WARRANTY, SO THIS DISCLAIMER MAY NOT APPLY TO YOU.
+# 10. Limitation of Liability
+#    EXCEPT AS PROHIBITED BY APPLICABLE LAW, IN NO EVENT AND UNDER NO LEGAL 
+#    THEORY, WHETHER IN TORT (INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE 
+#    SHALL ANY LICENSOR BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY DIRECT, 
+#    INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF 
+#    OR RELATED TO THIS LICENSE, THE USE OR INABILITY TO USE THE WORK 
+#    (INCLUDING BUT NOT LIMITED TO LOSS OF GOODWILL, BUSINESS INTERRUPTION, 
+#    LOST PROFITS OR DATA, COMPUTER FAILURE OR MALFUNCTION, OR ANY OTHER 
+#    COMMERCIAL DAMAGES OR LOSSES), EVEN IF THE LICENSOR HAS BEEN ADVISED OF 
+#    THE POSSIBILITY OF SUCH DAMAGES.
+# 
+# 
+#
+# BCM56960K SVK board 32x40g port configuration.
+#
+# configuration yaml file
+#   device:
+#       <unit>:
+#           <table>:
+#               ?
+#                   <key_fld_1>: <value>
+#                   <key_fld_2>: <value>
+#                   ...
+#                   <key_fld_n>: <value>
+#               :
+#                   <data_fld_1>: <value>
+#                   <data_fld_2>: <value>
+#                   ...
+#                   <data_fld_n>: <value>
+#
+# All example CLI scripts use this config file.
+# Please do not any IP,EP LTs to this file.
+
+---
+device:
+    0:
+        PC_PM_TX_LANE_PROFILE:
+            ?
+                PC_PM_TX_LANE_PROFILE_ID: 1
+            :
+                TX_AMP: 8
+                TX_POST: 0xc
+                TX_POST2: 0
+                TX_POST3: 0
+                TX_MAIN: 0x64
+                TX_PRE: 0
+            ?
+                PC_PM_TX_LANE_PROFILE_ID: 2
+            :
+                TX_AMP: 8
+                TX_POST: 0x17
+                TX_POST2: 0
+                TX_POST3: 0
+                TX_MAIN: 0x59
+                TX_PRE: 0
+...
+---
+device:
+    0:
+        PC_PM:
+            ?
+                PC_PM_ID: 0
+            :
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 1
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 2
+            :
+                # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 3
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 4
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 5
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 6
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 7
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 8
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 9
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 10
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 11
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 12
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 13
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 14
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 15
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 16
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 17
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 18
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 19
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 20
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 21
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 22
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 23
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 24
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 25
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 26
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 27
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 28
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 29
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 30
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 31
+            :   # Same as PM_ID_0
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [40000]
+                LANE_MAP: [0xf]
+            ?
+                PC_PM_ID: 0x24
+            :
+                PM_OPMODE: [PC_PM_OPMODE_DEFAULT]
+                SPEED_MAX: [10000, 0, 10000, 0]
+                LANE_MAP: [0x1, 0x2, 0x4, 0x8]
+...
+---
+device:
+    0:
+        PC_PM_CORE:
+            ?
+                PC_PM_ID: 0
+                CORE_INDEX: 0
+            :
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 1
+                CORE_INDEX: 0
+            :   # Same as PM_ID_0
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 2
+                CORE_INDEX: 0
+            :   # Same as PM_ID_0
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 3
+                CORE_INDEX: 0
+            :   # Same as PM_ID_0
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 4
+                CORE_INDEX: 0
+            :
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 2
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 5
+                CORE_INDEX: 0
+            :
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 5
+                TX_POLARITY_FLIP: 8
+            ?
+                PC_PM_ID: 6
+                CORE_INDEX: 0
+            :   # Same as PM_ID_4
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 2
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 7
+                CORE_INDEX: 0
+            :
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 8
+            ?
+                PC_PM_ID: 8
+                CORE_INDEX: 0
+            :
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 8
+                TX_POLARITY_FLIP: 8
+            ?
+                PC_PM_ID: 9
+                CORE_INDEX: 0
+            :   # Same as PM_ID_0
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 10
+                CORE_INDEX: 0
+            :
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 1
+                TX_POLARITY_FLIP: 8
+            ?
+                PC_PM_ID: 11
+                CORE_INDEX: 0
+            :   # Same as PM_ID_4
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 2
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 12
+                CORE_INDEX: 0
+            :   # Same as PM_ID_0
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 13
+                CORE_INDEX: 0
+            :   # Same as PM_ID_0
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 14
+                CORE_INDEX: 0
+            :   # Same as PM_ID_0
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 15
+                CORE_INDEX: 0
+            :   # Same as PM_ID_0
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 16
+                CORE_INDEX: 0
+            :   # Same as PM_ID_0
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 17
+                CORE_INDEX: 0
+            :   # Same as PM_ID_0
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 18
+                CORE_INDEX: 0
+            :
+                RX_LANE_MAP: 0x1032
+                TX_LANE_MAP: 0x1032
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 19
+                CORE_INDEX: 0
+            :
+                RX_LANE_MAP: 0x2301
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 3
+                TX_POLARITY_FLIP: 2
+            ?
+                PC_PM_ID: 20
+                CORE_INDEX: 0
+            :
+                RX_LANE_MAP: 0x2301
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 8
+            ?
+                PC_PM_ID: 21
+                CORE_INDEX: 0
+            :
+                RX_LANE_MAP: 0x2301
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 4
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 22
+                CORE_INDEX: 0
+            :
+                RX_LANE_MAP: 0x2301
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 8
+                TX_POLARITY_FLIP: 8
+            ?
+                PC_PM_ID: 23
+                CORE_INDEX: 0
+            :   # Same as PM_ID_21
+                RX_LANE_MAP: 0x2301
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 4
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 24
+                CORE_INDEX: 0
+            :
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 8
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 25
+                CORE_INDEX: 0
+            :
+                RX_LANE_MAP: 0x2301
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 8
+                TX_POLARITY_FLIP: 8
+            ?
+                PC_PM_ID: 26
+                CORE_INDEX: 0
+            :   # Same as PM_ID_21
+                RX_LANE_MAP: 0x2301
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 4
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 27
+                CORE_INDEX: 0
+            :  # Same as PM_ID_21
+                RX_LANE_MAP: 0x2301
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 8
+                TX_POLARITY_FLIP: 8
+            ?
+                PC_PM_ID: 28
+                CORE_INDEX: 0
+            :
+                RX_LANE_MAP: 0x2301
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 29
+                CORE_INDEX: 0
+            :   # Same as PM_ID_0
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 30
+                CORE_INDEX: 0
+            :   # Same as PM_ID_0
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+            ?
+                PC_PM_ID: 31
+                CORE_INDEX: 0
+            :   # Same as PM_ID_0
+                RX_LANE_MAP: 0x3210
+                TX_LANE_MAP: 0x3210
+                RX_POLARITY_FLIP: 0
+                TX_POLARITY_FLIP: 0
+...
+---
+device:
+    0:
+        PC_PM_LANE:
+            ?
+                PC_PM_ID: 0
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 0
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 0
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 0
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 1
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 1
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 1
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 1
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 2
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 2
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 2
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 2
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 3
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 3
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 3
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 3
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 4
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 4
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 4
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 4
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 5
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 5
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 5
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 5
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 6
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 6
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 6
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 6
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 7
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 7
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 7
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 7
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 8
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 8
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 8
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 8
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 9
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 9
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 9
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 9
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 10
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 10
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 10
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 10
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 11
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 11
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 11
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 11
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 12
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 12
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 12
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 12
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 13
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 13
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 13
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 13
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 14
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 14
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 14
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 14
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 15
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 15
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 15
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 15
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 16
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 16
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 16
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 16
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 17
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 17
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 17
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 17
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 18
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 18
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 18
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 18
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 19
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 19
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 19
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 19
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 20
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 20
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 20
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 20
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 21
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 21
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 21
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 21
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 22
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 22
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 22
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 22
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 23
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 23
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 23
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 23
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 24
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 24
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 24
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 24
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 25
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 25
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 25
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 25
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 26
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 26
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 26
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 26
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 27
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 27
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 27
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 27
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 28
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 28
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 28
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 28
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 29
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 29
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 29
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 29
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 30
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 30
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 30
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 30
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 31
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 31
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 31
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+            ?
+                PC_PM_ID: 31
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_0_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [1]
+
+            ?
+                PC_PM_ID: 36
+                CORE_INDEX: 0
+                CORE_LANE: 0
+            :
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [2]
+            ?
+                PC_PM_ID: 36
+                CORE_INDEX: 0
+                CORE_LANE: 1
+            :   # Same as PM_ID_36_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [2]
+            ?
+                PC_PM_ID: 36
+                CORE_INDEX: 0
+                CORE_LANE: 2
+            :   # Same as PM_ID_36_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [2]
+            ?
+                PC_PM_ID: 36
+                CORE_INDEX: 0
+                CORE_LANE: 3
+            :   # Same as PM_ID_36_CORE_0_LANE_0
+                PORT_OPMODE: [PC_PORT_OPMODE_ANY]
+                PC_PM_TX_LANE_PROFILE_ID: [2]
+...
+---
+device:
+    0:
+        PC_PORT:
+            ?
+                PORT_ID: 1
+            :
+                PC_PHYS_PORT_ID: 1
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 2
+            :
+                PC_PHYS_PORT_ID: 5
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 3
+            :
+                PC_PHYS_PORT_ID: 9
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 4
+            :
+                PC_PHYS_PORT_ID: 13
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 5
+            :
+                PC_PHYS_PORT_ID: 17
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 6
+            :
+                PC_PHYS_PORT_ID: 21
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 7
+            :
+                PC_PHYS_PORT_ID: 25
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 8
+            :
+                PC_PHYS_PORT_ID: 29
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 34
+            :
+                PC_PHYS_PORT_ID: 33
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 35
+            :
+                PC_PHYS_PORT_ID: 37
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 36
+            :
+                PC_PHYS_PORT_ID: 41
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 37
+            :
+                PC_PHYS_PORT_ID: 45
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 38
+            :
+                PC_PHYS_PORT_ID: 49
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 39
+            :
+                PC_PHYS_PORT_ID: 53
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 40
+            :
+                PC_PHYS_PORT_ID: 57
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 41
+            :
+                PC_PHYS_PORT_ID: 61
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 68
+            :
+                PC_PHYS_PORT_ID: 65
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 69
+            :
+                PC_PHYS_PORT_ID: 69
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 70
+            :
+                PC_PHYS_PORT_ID: 73
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 71
+            :
+                PC_PHYS_PORT_ID: 77
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 72
+            :
+                PC_PHYS_PORT_ID: 81
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 73
+            :
+                PC_PHYS_PORT_ID: 85
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 74
+            :
+                PC_PHYS_PORT_ID: 89
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 75
+            :
+                PC_PHYS_PORT_ID: 93
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 102
+            :
+                PC_PHYS_PORT_ID: 97
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 103
+            :
+                PC_PHYS_PORT_ID: 101
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 104
+            :
+                PC_PHYS_PORT_ID: 105
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 105
+            :
+                PC_PHYS_PORT_ID: 109
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 106
+            :
+                PC_PHYS_PORT_ID: 113
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 107
+            :
+                PC_PHYS_PORT_ID: 117
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 108
+            :
+                PC_PHYS_PORT_ID: 121
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 109
+            :
+                PC_PHYS_PORT_ID: 125
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_40G_KR
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 66
+            :
+                PC_PHYS_PORT_ID: 129
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_10G_XFI
+                MAX_FRAME_SIZE: 0x3fe8
+            ?
+                PORT_ID: 100
+            :
+                PC_PHYS_PORT_ID: 131
+                ENABLE: 1
+                OPMODE: PC_PORT_OPMODE_10G_XFI
+                MAX_FRAME_SIZE: 0x3fe8
+...
+---
+device:
+    0:
+        ECMP_CONFIG:
+            MODE: HIERARCHICAL
+...

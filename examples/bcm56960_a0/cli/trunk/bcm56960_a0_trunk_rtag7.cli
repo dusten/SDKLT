@@ -1,0 +1,311 @@
+#
+# Copyright: (c) 2018 Broadcom. All Rights Reserved. "Broadcom" refers to 
+# Broadcom Limited and/or its subsidiaries.
+# 
+# Broadcom Switch Software License
+# 
+# This license governs the use of the accompanying Broadcom software. Your 
+# use of the software indicates your acceptance of the terms and conditions 
+# of this license. If you do not agree to the terms and conditions of this 
+# license, do not use the software.
+# 1. Definitions
+#    "Licensor" means any person or entity that distributes its Work.
+#    "Software" means the original work of authorship made available under 
+#    this license.
+#    "Work" means the Software and any additions to or derivative works of 
+#    the Software that are made available under this license.
+#    The terms "reproduce," "reproduction," "derivative works," and 
+#    "distribution" have the meaning as provided under U.S. copyright law.
+#    Works, including the Software, are "made available" under this license 
+#    by including in or with the Work either (a) a copyright notice 
+#    referencing the applicability of this license to the Work, or (b) a copy 
+#    of this license.
+# 2. Grant of Copyright License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    copyright license to reproduce, prepare derivative works of, publicly 
+#    display, publicly perform, sublicense and distribute its Work and any 
+#    resulting derivative works in any form.
+# 3. Grant of Patent License
+#    Subject to the terms and conditions of this license, each Licensor 
+#    grants to you a perpetual, worldwide, non-exclusive, and royalty-free 
+#    patent license to make, have made, use, offer to sell, sell, import, and 
+#    otherwise transfer its Work, in whole or in part. This patent license 
+#    applies only to the patent claims licensable by Licensor that would be 
+#    infringed by Licensor's Work (or portion thereof) individually and 
+#    excluding any combinations with any other materials or technology.
+#    If you institute patent litigation against any Licensor (including a 
+#    cross-claim or counterclaim in a lawsuit) to enforce any patents that 
+#    you allege are infringed by any Work, then your patent license from such 
+#    Licensor to the Work shall terminate as of the date such litigation is 
+#    filed.
+# 4. Redistribution
+#    You may reproduce or distribute the Work only if (a) you do so under 
+#    this License, (b) you include a complete copy of this License with your 
+#    distribution, and (c) you retain without modification any copyright, 
+#    patent, trademark, or attribution notices that are present in the Work.
+# 5. Derivative Works
+#    You may specify that additional or different terms apply to the use, 
+#    reproduction, and distribution of your derivative works of the Work 
+#    ("Your Terms") only if (a) Your Terms provide that the limitations of 
+#    Section 7 apply to your derivative works, and (b) you identify the 
+#    specific derivative works that are subject to Your Terms. 
+#    Notwithstanding Your Terms, this license (including the redistribution 
+#    requirements in Section 4) will continue to apply to the Work itself.
+# 6. Trademarks
+#    This license does not grant any rights to use any Licensor's or its 
+#    affiliates' names, logos, or trademarks, except as necessary to 
+#    reproduce the notices described in this license.
+# 7. Limitations
+#    Platform. The Work and any derivative works thereof may only be used, or 
+#    intended for use, with a Broadcom switch integrated circuit.
+#    No Reverse Engineering. You will not use the Work to disassemble, 
+#    reverse engineer, decompile, or attempt to ascertain the underlying 
+#    technology of a Broadcom switch integrated circuit.
+# 8. Termination
+#    If you violate any term of this license, then your rights under this 
+#    license (including the license grants of Sections 2 and 3) will 
+#    terminate immediately.
+# 9. Disclaimer of Warranty
+#    THE WORK IS PROVIDED "AS IS" WITHOUT WARRANTIES OR CONDITIONS OF ANY 
+#    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WARRANTIES OR CONDITIONS OF 
+#    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE OR 
+#    NON-INFRINGEMENT. YOU BEAR THE RISK OF UNDERTAKING ANY ACTIVITIES UNDER 
+#    THIS LICENSE. SOME STATES' CONSUMER LAWS DO NOT ALLOW EXCLUSION OF AN 
+#    IMPLIED WARRANTY, SO THIS DISCLAIMER MAY NOT APPLY TO YOU.
+# 10. Limitation of Liability
+#    EXCEPT AS PROHIBITED BY APPLICABLE LAW, IN NO EVENT AND UNDER NO LEGAL 
+#    THEORY, WHETHER IN TORT (INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE 
+#    SHALL ANY LICENSOR BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY DIRECT, 
+#    INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF 
+#    OR RELATED TO THIS LICENSE, THE USE OR INABILITY TO USE THE WORK 
+#    (INCLUDING BUT NOT LIMITED TO LOSS OF GOODWILL, BUSINESS INTERRUPTION, 
+#    LOST PROFITS OR DATA, COMPUTER FAILURE OR MALFUNCTION, OR ANY OTHER 
+#    COMMERCIAL DAMAGES OR LOSSES), EVEN IF THE LICENSOR HAS BEEN ADVISED OF 
+#    THE POSSIBILITY OF SUCH DAMAGES.
+# 
+# 
+#
+
+################################################################################
+
+# Purpose: Demonstrate the load balance on TRUNK with LB_HASH HASH algorithm.
+
+# Description: Several physical ports can be bundled together to form a single
+# logical link or a TRUNK. This test demo the known/unknown unicast traffic to
+# TRUNK, and the traffic is distributed to TRUNK member ports with legacy load
+# balance algorithm.
+
+# Setup diagram:
+#
+#                    +--------------------------+ TRUNK group,member ports 1,2,3
+#                    |                          | port 1   xx
+# DstMac:0x22/0x222  |                          +---------x--x->
+# VLAN=11            |                          | port 2  x  x
+#       +----------> |         TH SVK           +---------x--x->
+#            port 4  |                          | port 3  x  x
+#                    |                          +---------x--x->
+#                    |                          |          xx
+#                    +--------------------------+
+
+# Ingress port(s): 4.
+
+# Egress ports(s): TRUNK member ports(1,2,3).
+
+# Egress CoS queue: Not relevant.
+
+# Device: bcm56960_a0.
+
+# NGSDK Version: 0.8
+
+# Notes:
+
+# Verification method: To check the MAC counters on each TRUNK member ports,
+# expect the packets should be distributed to each TRUNK member port evenly.
+#
+################################################################################
+
+# Initialize the packet device.
+pktdev init
+
+# Port configurations.
+local PORT1_VID 11
+local PORT2_VID 11
+local PORT3_VID 11
+local PORT4_VID 11
+
+local PORT1 1
+local PORT2 2
+local PORT3 3
+local PORT4 4
+
+local PORTS_BITMAP 0x00000001E
+
+# Enable link manager(linkscan task).
+lt LM_CONTROL insert SCAN_ENABLE=1
+
+# Configure software linkscan mode for ports 1-4.
+for port=1,4,1 'lt LM_PORT_CONTROL insert PORT_ID=$port LINKSCAN_MODE=SOFTWARE'
+
+# Configure port MAC loopback on ports 1-4.
+for port=1,4,1 'lt PC_PORT update PORT_ID=$port LOOPBACK_MODE=PC_LPBK_MAC'
+
+# Allow link manager to collect status of the ports 1 - 4.
+# Default link manager scan interval is 250 ms.
+sleep quiet 3
+
+# Check port 1 - 4 status. LINK_STATE=1 indicates port is UP.
+for port=1,4,1 'lt LM_LINK_STATE lookup PORT_ID=$port'
+
+# Create MAC counters for ports 1 - 4.
+for port=1,4,1 'lt CTR_MAC insert PORT_ID=$port'
+
+# Enable counter collection for ports 1-4.
+lt CTR_CONTROL update PORTS=0x1e
+
+# Setup VLAN STG.
+lt VLAN_STG insert VLAN_STG_ID=1 STATE[1-4]=FORWARD
+
+# Add outer VLAN tag for untagged packets.
+lt VLAN_ING_TAG_ACTION_PROFILE insert VLAN_ING_TAG_ACTION_PROFILE_ID=1 \
+                                      UT_OTAG=ADD SOT_OTAG=DO_NOT_MODIFY
+
+# Create one VLAN and add ports 1 - 4 into this VLAN.
+lt VLAN insert VLAN_ID=$PORT1_VID EGR_MEMBER_PORTS=$PORTS_BITMAP \
+               ING_MEMBER_PORTS=$PORTS_BITMAP L3_IIF_ID=1 \
+               UNTAGGED_MEMBER_PORTS=$PORTS_BITMAP VLAN_STG_ID=1
+
+# Configure port property.
+lt PORT insert PORT_ID=$PORT1 PORT_TYPE=ETHERNET MY_MODID=0 ING_OVID=$PORT1_VID \
+               EGR_OVID=$PORT1_VID VLAN_ING_TAG_ACTION_PROFILE_ID=1
+lt PORT insert PORT_ID=$PORT2 PORT_TYPE=ETHERNET MY_MODID=0 ING_OVID=$PORT2_VID \
+               EGR_OVID=$PORT2_VID VLAN_ING_TAG_ACTION_PROFILE_ID=1
+lt PORT insert PORT_ID=$PORT3 PORT_TYPE=ETHERNET MY_MODID=0 ING_OVID=$PORT3_VID \
+               EGR_OVID=$PORT3_VID VLAN_ING_TAG_ACTION_PROFILE_ID=1
+lt PORT insert PORT_ID=$PORT4 PORT_TYPE=ETHERNET MY_MODID=0 ING_OVID=$PORT4_VID \
+               EGR_OVID=$PORT4_VID VLAN_ING_TAG_ACTION_PROFILE_ID=1
+
+# Configure outer VLAN TPID index from 0.
+lt VLAN_OUTER_TPID insert VLAN_OUTER_TPID_ID=0 ING_TPID=0x8100 EGR_TPID=0x8100
+
+# On ports 1 - 3, enable outer VLAN TPID index 0(0x8100), discard the tagged
+# and untagged packets.
+lt PORT_POLICY insert PORT_ID=$PORT1 PASS_ON_OUTER_TPID_MATCH[0]=1 \
+                      DROP_TAG=1 DROP_UNTAG=1
+lt PORT_POLICY insert PORT_ID=$PORT2 PASS_ON_OUTER_TPID_MATCH[0]=1 \
+                      DROP_UNTAG=1 DROP_TAG=1
+lt PORT_POLICY insert PORT_ID=$PORT3 PASS_ON_OUTER_TPID_MATCH[0]=1 \
+                      DROP_UNTAG=1 DROP_TAG=1
+
+# On port 4, enable outer VLAN TPID index 0(0x8100).
+lt PORT_POLICY insert PORT_ID=$PORT4 PASS_ON_OUTER_TPID_MATCH[0]=1
+
+# Create TRUNK with ID=1, add TRUNK member ports, and select LB_HASH HASH
+# algorithm for unicast packets.
+lt TRUNK insert TRUNK_ID=1 LB_MODE=REG_HASH UC_RTAG=LB_HASH UC_MEMBER_CNT=3 \
+                UC_MEMBER_MODID[0]=0 UC_MEMBER_MODPORT[0]=1 \
+                UC_MEMBER_MODID[1]=0 UC_MEMBER_MODPORT[1]=2 \
+                UC_MEMBER_MODID[2]=0 UC_MEMBER_MODPORT[2]=3
+
+lt TRUNK update TRUNK_ID=1 NONUC_MEMBER_CNT=3 \
+                NONUC_MEMBER_MODID[0]=0 NONUC_MEMBER_MODPORT[0]=1 \
+                NONUC_MEMBER_MODID[1]=0 NONUC_MEMBER_MODPORT[1]=2 \
+                NONUC_MEMBER_MODID[2]=0 NONUC_MEMBER_MODPORT[2]=3
+
+# Configure TRUNK HASH keys of non-unicast packets, select LB_HASH HASH
+# algorithm for non-unicast packets.
+lt TRUNK_CONTROL insert NONUC_HASH_USE_LB_HASH=1
+
+# Set port type to TRUNK.
+lt PORT_MODBASE insert MODID=0 PORT_SYSTEM_ID=10
+lt PORT_SYSTEM insert PORT_SYSTEM_ID=10 MODPORT=1 SYSTEM_PORT_TYPE=TRUNK_PORT \
+                      TRUNK_ID=1
+lt PORT_SYSTEM insert PORT_SYSTEM_ID=10 MODPORT=2 SYSTEM_PORT_TYPE=TRUNK_PORT \
+                      TRUNK_ID=1
+lt PORT_SYSTEM insert PORT_SYSTEM_ID=10 MODPORT=3 SYSTEM_PORT_TYPE=TRUNK_PORT \
+                      TRUNK_ID=1
+
+# Add L2 static entry of TRUNK ID=1.
+lt L2_FDB_VLAN insert VLAN_ID=$PORT2_VID MAC_ADDR=0x22 TRUNK_ID=1 \
+                      DEST_TYPE=TRUNK STATIC=1
+
+# Add L2 related field selection configuration for LB_HASH HASH.
+lt LB_HASH_L2_FIELDS_SELECTION insert HASH0_MAC_SA_LO=1 HASH0_MAC_SA_MED=1 \
+                                      HASH0_MAC_SA_HI=1 HASH0_MAC_DA_LO=1 \
+                                      HASH0_MAC_DA_MED=1 HASH0_MAC_DA_HI=1 \
+                                      HASH0_CNTAG_RPID=1 HASH0_ETH_TYPE=1 \
+                                      HASH0_VID=1 HASH0_SRC_PORT=1 \
+                                      HASH0_SRC_MODID=1 HASH0_VNTAG_DST_VIF=1 \
+                                      HASH0_DST_PORT=1 HASH0_VNTAG_SRC_VIF=1 \
+                                      HASH0_DST_MODID=1 \
+                                      HASH1_MAC_SA_LO=1 HASH1_MAC_SA_MED=1 \
+                                      HASH1_MAC_SA_HI=1 HASH1_MAC_DA_LO=1 \
+                                      HASH1_MAC_DA_MED=1 HASH1_MAC_DA_HI=1 \
+                                      HASH1_CNTAG_RPID=1 HASH1_ETH_TYPE=1 \
+                                      HASH1_VID=1 HASH1_SRC_PORT=1 \
+                                      HASH1_SRC_MODID=1 HASH1_VNTAG_DST_VIF=1 \
+                                      HASH1_DST_PORT=1 HASH1_VNTAG_SRC_VIF=1 \
+                                      HASH1_DST_MODID=1
+
+# Add IPv4 related field selection configuration for LB_HASH HASH.
+lt LB_HASH_IPV4_FIELDS_SELECTION insert HASH0_DIP_LO=1 HASH0_DIP_HI=1 \
+                                        HASH0_SIP_LO=1 HASH0_SIP_HI=1 \
+                                        HASH0_SRC_MODID=1 HASH0_SRC_PORT=1 \
+                                        HASH0_DST_MODID=1 HASH0_DST_PORT=1 \
+                                        HASH0_L4_SRC=1 HASH0_L4_DST=1 \
+                                        HASH0_VID=1 HASH0_PROTOCOL=1 \
+                                        HASH0_VNTAG_DST_VIF=1 \
+                                        HASH0_VNTAG_SRC_VIF=1 \
+                                        HASH0_CNTAG_RPID=1 \
+                                        HASH1_DIP_LO=1 HASH1_DIP_HI=1 \
+                                        HASH1_SIP_LO=1 HASH1_SIP_HI=1 \
+                                        HASH1_DST_MODID=1 HASH1_DST_PORT=1 \
+                                        HASH1_SRC_MODID=1 HASH1_SRC_PORT=1 \
+                                        HASH1_L4_SRC=1 HASH1_L4_DST=1 \
+                                        HASH1_VID=1 HASH1_PROTOCOL=1 \
+                                        HASH1_VNTAG_DST_VIF=1 \
+                                        HASH1_VNTAG_SRC_VIF=1 \
+                                        HASH1_CNTAG_RPID=1
+
+# Select algorithm CRC32_LO for HASH 0/1 instance 0/1.
+lt LB_HASH_ALGORITHM insert HASH0_INSTANCE0_ALG=CRC32_LO \
+                            HASH0_INSTANCE1_ALG=CRC32_LO \
+                            HASH1_INSTANCE0_ALG=CRC32_LO \
+                            HASH1_INSTANCE1_ALG=CRC32_LO
+
+# For port 4, select non-concatenate mode, subset 0, offset 0.
+lt LB_HASH_PORT_TRUNK_OUTPUT_SELECTION insert PORT_ID=$PORT4 \
+                                              UC_CONCAT=0 \
+                                              UC_SUBSET_SELECT=USE_0_0 \
+                                              UC_OFFSET=0 \
+                                              NONUC_CONCAT=0 \
+                                              NONUC_SUBSET_SELECT=USE_0_0 \
+                                              NONUC_OFFSET=0
+
+
+# Send the known unicast test packets, and check the packet load balance
+# distribution.
+tx 1000 portlist=4 VlanID=11 DestMac=0x22 SourceMac=0x1111 SourceMacInc=1
+
+# Allow counter thread sync the counters.
+sleep quiet 2
+
+# Check the MAC RX/TX counters.
+for i=1,4,1 'echo "port: $i"; lt CTR_MAC lookup PORT_ID=$i | grep X_PKT'
+
+# Check TPKT counter from hardware register.
+dsh -c "get nz flags=counter TPKTr.port"
+
+# Send the unknown unicast test packets, and check the packets load balance
+# distribution.
+tx 1000 portlist=4 VlanID=11 DestMac=0x222 SourceMac=0x1111 SourceMacInc=1
+
+# Allow counter thread sync the counters.
+sleep quiet 2
+
+# Check the MAC RX/TX counters.
+for i=1,4,1 'echo "port: $i"; lt CTR_MAC lookup PORT_ID=$i | grep X_PKT'
+
+# Check TPKT counter from hardware register.
+dsh -c "get nz flags=counter TPKTr.port"
+

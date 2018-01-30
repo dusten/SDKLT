@@ -1,0 +1,40 @@
+#if BCMDRD_CONFIG_INCLUDE_BCM56963_A0 == 1 || defined(BCMDRD_DEVLIST_OVERRIDE)
+#ifdef BCMDRD_DEVLIST_INCLUDE_ALL
+BCMDRD_DEVLIST_ENTRY(BCM56963, BCM56963_VENDOR_ID, BCM56963_DEVICE_ID, BCM56963_REV_A0, \
+                     0, 0, \
+                     bcm56960_a0, bcm56963_a0, bcm56963_a0, \
+                     "Tomahawk", "BCM56960", \
+                     "32x100G/64x40G/128x25G Ethernet Switch", 0, 0)
+#endif
+#endif
+
+#if BCMDRD_CONFIG_INCLUDE_BCM56963_A1 == 1 || defined(BCMDRD_DEVLIST_OVERRIDE)
+#ifdef BCMDRD_DEVLIST_INCLUDE_ALL
+BCMDRD_DEVLIST_ENTRY(BCM56963, BCM56963_VENDOR_ID, BCM56963_DEVICE_ID, BCM56963_REV_A1, \
+                     0, 0, \
+                     bcm56960_a0, bcm56963_a0, bcm56963_a1, \
+                     "Tomahawk", "BCM56960", \
+                     "32x100G/64x40G/128x25G Ethernet Switch", 0, 0)
+#endif
+#endif
+
+#if BCMDRD_CONFIG_INCLUDE_BCM56963_B0 == 1 || defined(BCMDRD_DEVLIST_OVERRIDE)
+#ifdef BCMDRD_DEVLIST_INCLUDE_ALL
+BCMDRD_DEVLIST_ENTRY(BCM56963, BCM56963_VENDOR_ID, BCM56963_DEVICE_ID, BCM56963_REV_B0, \
+                     0, 0, \
+                     bcm56960_a0, bcm56963_a0, bcm56963_b0, \
+                     "Tomahawk", "BCM56960", \
+                     "32x100G/64x40G/128x25G Ethernet Switch", 0, 0)
+#endif
+#endif
+
+#if BCMDRD_CONFIG_INCLUDE_BCM56963_B1 == 1 || defined(BCMDRD_DEVLIST_OVERRIDE)
+#ifdef BCMDRD_DEVLIST_INCLUDE_ALL
+BCMDRD_DEVLIST_ENTRY(BCM56963, BCM56963_VENDOR_ID, BCM56963_DEVICE_ID, BCM56963_REV_B1, \
+                     0, 0, \
+                     bcm56960_a0, bcm56963_a0, bcm56963_b1, \
+                     "Tomahawk", "BCM56960", \
+                     "32x100G/64x40G/128x25G Ethernet Switch", 0, 0)
+#endif
+#endif
+
